@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Las Copas de Champagne — Simulador Ejecutivo MSTD</title>
+  <style>
+    :root {
+      --bg: #14161d;
+      --bg-soft: #1a1d27;
+      --surface: #1f2330;
+      --surface-2: #262b3b;
+      --border: rgba(229, 193, 88, 0.22);
+      --border-strong: rgba(229, 193, 88, 0.48);
+      --text: #f7f2e7;
+      --text-soft: #d6cfc0;
+      --muted: #98a2b3;
+      --gold: #e5c158;
+      --gold-bright: #f7de8a;
+      --gold-deep: #b88b26;
+      --champagne: #fbf3dc;
+      --champagne-soft: rgba(245, 230, 200, 0.12);
+      --rose-defect: #e08a44;
+      --rose-defect-bg: rgba(224, 138, 68, 0.16);
+      --green: #34d399;
+      --green-bg: rgba(16, 185, 129, 0.14);
+      --amber: #fbbf24;
+      --amber-bg: rgba(245, 158, 11, 0.15);
+      --red: #f87171;
+      --red-bg: rgba(239, 68, 68, 0.15);
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(229, 193, 88, 0.10) 0%, transparent 45%),
+        radial-gradient(circle at 85% 10%, rgba(224, 138, 68, 0.08) 0%, transparent 40%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+
+    /* HERO HEADER */
+    header {
+      background: linear-gradient(135deg, #101218 0%, #1c202c 55%, #23201b 100%);
+      border-bottom: 1px solid var(--border-strong);
+      padding: 20px 28px 18px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--champagne), var(--gold), transparent);
+      opacity: 0.75;
+    }
+
+    .header-inner {
+      max-width: 1540px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+      background: rgba(229, 193, 88, 0.12);
+      border: 1px solid rgba(229, 193, 88, 0.35);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 2.5vw, 2.25rem);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      background: linear-gradient(90deg, #fff8e7 0%, #f5d882 48%, #e5b74a 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 24px rgba(229, 193, 88, 0.18);
+    }
+
+    .title-block p {
+      margin: 5px 0 0;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--gold);
+      color: var(--champagne);
+      background: rgba(229, 193, 88, 0.10);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #f3d778 0%, #cfa135 100%);
+      color: #14161d;
+      border-color: var(--gold-bright);
+      box-shadow: 0 4px 16px rgba(229, 193, 88, 0.32);
+    }
+
+    main {
+      max-width: 1540px;
+      margin: 18px auto 38px;
+      padding: 0 20px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* TOP KPI STRIP */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 1220px) {
+      .kpi-strip {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .kpi-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi-tile {
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-tile::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright), transparent);
+      opacity: 0.7;
+    }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .kpi-val {
+      font-size: 1.24rem;
+      font-weight: 800;
+      color: var(--champagne);
+      margin: 3px 0 2px;
+    }
+
+    .kpi-sub {
+      font-size: 0.77rem;
+      color: var(--text-soft);
+    }
+
+    .progress-bar-wrap {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright));
+      transition: width 0.12s linear;
+    }
+
+    /* COCKPIT GRID */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 335px 1fr 465px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 1340px) {
+      .sim-grid {
+        grid-template-columns: 315px 1fr;
+      }
+      .sim-right {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 880px) {
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+    }
+
+    .card h2, .card h3 {
+      margin: 0 0 12px;
+      font-size: 1.02rem;
+      color: var(--champagne);
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .control-section {
+      margin-bottom: 15px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .control-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.86rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .pill-val {
+      background: var(--champagne-soft);
+      color: var(--gold-bright);
+      border: 1px solid rgba(229, 193, 88, 0.35);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .slider-num-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--gold);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    input[type="number"] {
+      width: 78px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: #141720;
+      color: var(--gold-bright);
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    input[type="number"]:focus, select:focus {
+      outline: none;
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 0 2px rgba(229, 193, 88, 0.25);
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .preset-row-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .preset-row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-chip {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: var(--surface-2);
+      color: var(--text-soft);
+      border-radius: 8px;
+      padding: 6px 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .btn-chip:hover:not(:disabled) {
+      border-color: var(--gold);
+      color: var(--champagne);
+      background: rgba(229, 193, 88, 0.12);
+    }
+
+    .btn-chip.selected {
+      background: linear-gradient(135deg, #f3d778 0%, #c99b32 100%);
+      color: #14161d;
+      border-color: var(--gold-bright);
+    }
+
+    .btn-chip.defect-selected {
+      background: linear-gradient(135deg, #f09d51 0%, #c85d1a 100%);
+      color: #14161d;
+      border-color: #fbbf77;
+    }
+
+    .btn-chip:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #141720;
+      font-size: 0.85rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .action-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-action {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.89rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease, filter 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-action:hover {
+      filter: brightness(1.06);
+    }
+
+    .btn-action:active {
+      transform: scale(0.985);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #f6de8c 0%, #d4a63b 100%);
+      color: #15171e;
+      box-shadow: 0 4px 14px rgba(229, 193, 88, 0.25);
+    }
+
+    .btn-champagne-outline {
+      background: rgba(245, 230, 200, 0.10);
+      color: var(--champagne);
+      border: 1px solid var(--border-strong);
+    }
+
+    .btn-mc {
+      background: linear-gradient(135deg, #e08a44 0%, #b8581d 100%);
+      color: #fff7ed;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-soft);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .hint-box {
+      background: rgba(229, 193, 88, 0.08);
+      border-left: 3px solid var(--gold);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.79rem;
+      color: var(--text-soft);
+      margin-top: 8px;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 12px;
+      background: #151822;
+      border: 1px solid rgba(229, 193, 88, 0.24);
+    }
+
+    .board-caption {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 9px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* VERDICT BANNER */
+    .verdict-banner {
+      border-radius: 12px;
+      padding: 11px 13px;
+      margin-bottom: 12px;
+      border: 1.5px solid;
+    }
+
+    .verdict-banner.ok {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: #d1fae5;
+    }
+
+    .verdict-banner.warn {
+      background: var(--amber-bg);
+      border-color: var(--amber);
+      color: #fef3c7;
+    }
+
+    .verdict-banner.bad {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: #fee2e2;
+    }
+
+    .verdict-banner.neutral {
+      background: rgba(229, 193, 88, 0.10);
+      border-color: var(--gold);
+      color: var(--champagne);
+    }
+
+    .verdict-title {
+      font-weight: 800;
+      font-size: 0.92rem;
+      margin-bottom: 3px;
+    }
+
+    .verdict-desc {
+      font-size: 0.81rem;
+      line-height: 1.4;
+      opacity: 0.95;
+    }
+
+    /* LIVE BIN TABLE */
+    .mini-table-wrap {
+      max-height: 185px;
+      overflow-y: auto;
+      margin-top: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th, td {
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      text-align: right;
+      color: var(--text-soft);
+    }
+
+    th:first-child, td:first-child, th:last-child, td:last-child {
+      text-align: left;
+    }
+
+    th {
+      background: #181b25;
+      font-weight: 700;
+      color: var(--gold-bright);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tr.highlight-row td {
+      background: rgba(52, 211, 153, 0.14);
+      color: #ecfdf5;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .badge-ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.4); }
+    .badge-warn { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.4); }
+    .badge-bad { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248, 113, 113, 0.4); }
+
+    /* DASHBOARDS & GALLERY */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1020px) {
+      .two-col, .three-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-card .big {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: var(--gold-bright);
+      margin: 4px 0 6px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .img-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .img-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      cursor: zoom-in;
+      background: #ffffff;
+      border: 1px solid rgba(229, 193, 88, 0.35);
+    }
+
+    .img-card p {
+      margin: 8px 0 0;
+      font-size: 0.84rem;
+      color: var(--text-soft);
+    }
+
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .step-text {
+      flex: 1 1 560px;
+    }
+
+    .step-text h3 {
+      margin: 0 0 6px;
+      color: var(--champagne);
+    }
+
+    .step-text p {
+      margin: 4px 0;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+
+    .quote-say {
+      background: rgba(229, 193, 88, 0.08);
+      border-radius: 8px;
+      padding: 9px 12px;
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: var(--champagne);
+      border: 1px dashed rgba(229, 193, 88, 0.45);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 12, 16, 0.90);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal img {
+      max-width: 95vw;
+      max-height: 92vh;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .svg-tree {
+      width: 100%;
+      max-width: 680px;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="title-block">
+        <div class="hero-badge">✦ Modelado, Simulación y Teoría de la Decisión (MSTD)</div>
+        <h1>LAS COPAS DE CHAMPAGNE — TABLERO DE GALTON</h1>
+        <p>Simulación estocástica en vivo · Determinación del mínimo de renglones (Etapa 1) e impacto de triángulo defectuoso 70/30 en el 4.º renglón (Etapa 2)</p>
+      </div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="tab-sim">1. Simulador en Vivo</button>
+        <button class="tab-btn" data-tab="tab-e1">2. Resultados Etapa 1 (X_mín = 10)</button>
+        <button class="tab-btn" data-tab="tab-e2">3. Resultados Etapa 2 (4.º Renglón)</button>
+        <button class="tab-btn" data-tab="tab-guion">4. Guion para Defender al Profesor</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- PESTAÑA 1: SIMULADOR EN VIVO -->
+    <section id="tab-sim" class="tab-panel active">
+      <!-- BARRA SUPERIOR DE KPIs -->
+      <div class="kpi-strip">
+        <div class="kpi-tile">
+          <div class="kpi-label">Experimento Actual (N)</div>
+          <div class="kpi-val" id="kpiBalls">0 / 100 bolas</div>
+          <div class="kpi-sub" id="kpiStatusSub">Tablero listo · X = 10 renglones</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="kpiProgressBar"></div></div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-label">Media (x̄ vs μ teórica)</div>
+          <div class="kpi-val" id="kpiMean">—</div>
+          <div class="kpi-sub" id="kpiDeltaMu">Δμ = —</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-label">Desvío y Asimetría</div>
+          <div class="kpi-val" id="kpiStd">—</div>
+          <div class="kpi-sub" id="kpiSkew">Asimetría = —</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-label">Bondad de Ajuste χ² (Cochran)</div>
+          <div class="kpi-val" id="kpiChi2">—</div>
+          <div class="kpi-sub" id="kpiChi2Sub">Normal Discretizada E_i ≥ 5</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-label">Curtosis & Criterio X·p ≥ 5</div>
+          <div class="kpi-val" id="kpiKurt">—</div>
+          <div class="kpi-sub" id="kpiCriterionSub">De Moivre-Laplace</div>
+        </div>
+      </div>
+
+      <!-- COCKPIT PRINCIPAL -->
+      <div class="sim-grid">
+        <!-- PANEL IZQUIERDO: CONTROLES -->
+        <aside class="card">
+          <h2><span>Controles de Simulación</span><span class="pill-val" id="modeTag">Etapa 1</span></h2>
+
+          <!-- CONTROL DUAL DE PELOTAS (RECTA + CAMPO NUMÉRICO) -->
+          <div class="control-section">
+            <div class="control-label">
+              <span>Cantidad de bolas a tirar (N)</span>
+              <span class="pill-val" id="ballsBadge">N = 100</span>
+            </div>
+            <div class="slider-num-row">
+              <input type="range" id="ballsSlider" min="1" max="1000" value="100" />
+              <input type="number" id="ballsInput" min="1" max="5000" value="100" aria-label="Cantidad de bolas" />
+            </div>
+            <div class="preset-row-5">
+              <button class="btn-chip ball-preset" data-balls="1">1</button>
+              <button class="btn-chip ball-preset" data-balls="50">50</button>
+              <button class="btn-chip ball-preset selected" data-balls="100">100 ⭐</button>
+              <button class="btn-chip ball-preset" data-balls="250">250</button>
+              <button class="btn-chip ball-preset" data-balls="500">500</button>
+            </div>
+          </div>
+
+          <!-- CONTROL DE RENGLONES (RECTA + CAMPO NUMÉRICO) -->
+          <div class="control-section">
+            <div class="control-label">
+              <span>Renglones de triángulos (X)</span>
+              <span class="pill-val" id="rowsBadge">X = 10 (11 copas)</span>
+            </div>
+            <div class="slider-num-row">
+              <input type="range" id="rowsSlider" min="3" max="15" value="10" />
+              <input type="number" id="rowsInput" min="3" max="15" value="10" aria-label="Cantidad de renglones" />
+            </div>
+            <div class="preset-row">
+              <button class="btn-chip row-preset" data-rows="3">X = 3</button>
+              <button class="btn-chip row-preset" data-rows="4">X = 4 (TP)</button>
+              <button class="btn-chip row-preset" data-rows="8">X = 8</button>
+              <button class="btn-chip row-preset selected" data-rows="10">X = 10 ⭐</button>
+              <button class="btn-chip row-preset" data-rows="12">X = 12</button>
+              <button class="btn-chip row-preset" data-rows="14">X = 14</button>
+            </div>
+          </div>
+
+          <!-- ETAPA 2: DEFECTO EN 4TO RENGLON -->
+          <div class="control-section">
+            <div class="control-label">
+              <span>Etapa 2: Defecto en 4.º renglón</span>
+              <span class="pill-val" id="defectBadge">50/50 Sano</span>
+            </div>
+            <div class="preset-row-2" id="defectButtons">
+              <button class="btn-chip defect-btn selected" data-defect="none">Sin defecto (50/50)</button>
+              <button class="btn-chip defect-btn" data-defect="random">Aleatorio (0..3)</button>
+              <button class="btn-chip defect-btn" data-defect="0">Pos 0 (Ext. Izq 12.5%)</button>
+              <button class="btn-chip defect-btn" data-defect="1">Pos 1 (Centro 37.5%)</button>
+              <button class="btn-chip defect-btn" data-defect="2">Pos 2 (Centro 37.5%)</button>
+              <button class="btn-chip defect-btn" data-defect="3">Pos 3 (Ext. Der 12.5%)</button>
+            </div>
+            <div class="hint-box">
+              Hacé <strong>clic directo</strong> sobre cualquiera de los 4 triángulos del 4.º renglón en la máquina para activar el defecto (70% izq. / 30% der.).
+            </div>
+          </div>
+
+          <!-- VELOCIDAD (SIEMPRE ANIMADO) -->
+          <div class="control-section">
+            <div class="control-label">
+              <span>Cadencia de animación</span>
+              <span style="font-size:0.74rem;color:var(--gold);">Siempre animada</span>
+            </div>
+            <select id="speedSelect">
+              <option value="slow">Cámara lenta didáctica</option>
+              <option value="normal" selected>Fluida normal (recomendada)</option>
+              <option value="fast">Rápida dinámica</option>
+              <option value="turbo">Turbo animada (ideal N &gt; 250)</option>
+            </select>
+          </div>
+
+          <!-- BOTONES DE ACCION -->
+          <div class="action-stack">
+            <button class="btn-action btn-gold" id="btnRunN">▶ Lanzar 100 bolas (Animado)</button>
+            <button class="btn-action btn-champagne-outline" id="btnRun1Slow">🔍 Lanzar 1 bola en cámara lenta</button>
+            <button class="btn-action btn-mc" id="btnRunMC">⚡ Simular 1.000 corridas (Monte Carlo)</button>
+            <button class="btn-action btn-ghost" id="btnReset">↺ Vaciar copas</button>
+          </div>
+        </aside>
+
+        <!-- PANEL CENTRAL: MÁQUINA FÍSICA ANIMADA -->
+        <section class="card">
+          <h2>
+            <span>Máquina Física entre Vidrios</span>
+            <span id="liveProgress" style="font-size:0.82rem;color:var(--gold-bright);">Listo para lanzar N = 100 bolas</span>
+          </h2>
+          <div class="canvas-wrap">
+            <canvas id="boardCanvas" width="660" height="600"></canvas>
+          </div>
+          <div class="board-caption">
+            <span>🥂 Triángulo estándar: 50/50 · 🔶 Defectuoso: 70% izq. / 30% der.</span>
+            <span id="row4TrafficSummary">Tráfico en 4.º renglón: esperando lanzamiento...</span>
+          </div>
+        </section>
+
+        <!-- PANEL DERECHO: GRÁFICO DE COLUMNAS + TABLA EN VIVO -->
+        <aside class="card sim-right">
+          <h2><span>Gráfico de Columnas &amp; Bondad de Ajuste</span></h2>
+          <div id="verdictBanner" class="verdict-banner neutral">
+            <div class="verdict-title" id="verdictTitle">Tablero listo (X = 10, N = 100)</div>
+            <div class="verdict-desc" id="verdictDesc">Presioná "Lanzar" para ver las bolas caer con animación física en tiempo real o ejecutá 1.000 réplicas Monte Carlo.</div>
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas id="chartCanvas" width="450" height="290"></canvas>
+          </div>
+
+          <div class="mini-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Copa (k)</th>
+                  <th>Obs (O_k)</th>
+                  <th>Esp. Norm (E_k)</th>
+                  <th>Dif (O - E)</th>
+                </tr>
+              </thead>
+              <tbody id="liveBinsBody"></tbody>
+            </table>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 2: RESULTADOS ETAPA 1 -->
+    <section id="tab-e1" class="tab-panel">
+      <div class="three-col" style="margin-bottom:18px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Resultado Etapa 1</div>
+          <div class="big">X_mín = 10 renglones</div>
+          <p style="margin:0;font-size:0.86rem;color:var(--text-soft);">Equivale a <strong>11 copas/receptáculos</strong> en la base. Recién desde X = 10 se cumplen simultáneamente todos los criterios de normalidad.</p>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Herramienta Elegida</div>
+          <div class="big" style="font-size:1.2rem;">χ² Normal Discretizada + K² + X·p ≥ 5</div>
+          <p style="margin:0;font-size:0.86rem;color:var(--text-soft);">Ideal para conteos discretos en contenedores: integra la normal en [k-0.5, k+0.5] y agrupa colas con regla de Cochran (E_i ≥ 5).</p>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Por qué falla Shapiro-Wilk crudo</div>
+          <div class="big" style="font-size:1.2rem;color:var(--red);">0.0% acep. hasta X = 11</div>
+          <p style="margin:0;font-size:0.86rem;color:var(--text-soft);">Con 100 bolas cayendo en pocos enteros hay &gt;85% de empates exactos. Shapiro-Wilk asume variable continua sin empates.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px;">
+        <h2>Tabla Completa Monte Carlo — Etapa 1 (N = 100 bolas, R = 1.000 réplicas por X)</h2>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Renglones (X)</th>
+                <th>Receptáculos</th>
+                <th>Clases Cochran (E≥5)</th>
+                <th>gl</th>
+                <th>χ² medio</th>
+                <th>p-valor med. (χ²)</th>
+                <th>% Acep. χ²</th>
+                <th>% Acep. K²</th>
+                <th>% Acep. SW crudo</th>
+                <th>Curtosis teór. (-2/X)</th>
+                <th>Veredicto</th>
+              </tr>
+            </thead>
+            <tbody id="tableStage1Body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="img-card">
+          <img src="output/etapa1_comparacion_columnas.png" alt="Comparación de columnas Etapa 1" onclick="openModal(this.src)" />
+          <p><strong>Gráficos de columnas (X = 3, 4, 6, 8 vs. X = 10 mínimo y X = 14):</strong> Se observa cómo para X ≤ 6 la campana es demasiado achatada (platicúrtica); en X = 10 ya adopta la campana gaussiana estable.</p>
+        </div>
+        <div class="img-card">
+          <img src="output/etapa1_evolucion_normalidad.png" alt="Evolución de normalidad Etapa 1" onclick="openModal(this.src)" />
+          <p><strong>Evolución de criterios:</strong> χ² y D'Agostino-Pearson K² superan el 90% mientras la platicurtosis |2/X| baja a ≤ 0.20 en X = 10. Shapiro-Wilk crudo queda ~0% por empates discretos.</p>
+        </div>
+        <div class="img-card">
+          <img src="output/etapa1_detalle_x_min.png" alt="Detalle X mínimo = 10" onclick="openModal(this.src)" />
+          <p><strong>Zoom en X_mín = 10 renglones:</strong> Comparación barra a barra entre frecuencias observadas (N=100), esperadas de la Normal Discretizada N(5.0, 2.50) y densidad continua.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 3: RESULTADOS ETAPA 2 -->
+    <section id="tab-e2" class="tab-panel">
+      <div class="two-col" style="margin-bottom:18px;">
+        <div class="card">
+          <h2>¿Por qué importa la ubicación en el 4.º renglón?</h2>
+          <p style="font-size:0.9rem;color:var(--text-soft);">
+            Para llegar al <strong>4.º renglón</strong>, cada bola atravesó <strong>3 renglones sanos</strong> (50/50), generando 2³ = 8 caminos posibles.
+            Los dos triángulos centrales reciben el <strong>37.5% (3/8)</strong> de las bolas cada uno, mientras los extremos reciben solo el <strong>12.5% (1/8)</strong>.
+          </p>
+          <svg class="svg-tree" viewBox="0 0 600 265" aria-label="Árbol de probabilidades hasta el 4to renglón">
+            <rect x="0" y="0" width="600" height="265" rx="12" fill="#171a23" stroke="rgba(229,193,88,0.35)"/>
+            <g stroke="rgba(229,193,88,0.45)" stroke-width="2">
+              <line x1="300" y1="36" x2="225" y2="92"/>
+              <line x1="300" y1="36" x2="375" y2="92"/>
+              <line x1="225" y1="92" x2="150" y2="148"/>
+              <line x1="225" y1="92" x2="300" y2="148"/>
+              <line x1="375" y1="92" x2="300" y2="148"/>
+              <line x1="375" y1="92" x2="450" y2="148"/>
+              <line x1="150" y1="148" x2="75" y2="206"/>
+              <line x1="150" y1="148" x2="225" y2="206"/>
+              <line x1="300" y1="148" x2="225" y2="206"/>
+              <line x1="300" y1="148" x2="375" y2="206"/>
+              <line x1="450" y1="148" x2="375" y2="206"/>
+              <line x1="450" y1="148" x2="525" y2="206"/>
+            </g>
+            <text x="16" y="40" font-size="12" font-weight="700" fill="#98a2b3">Renglón 1</text>
+            <text x="16" y="96" font-size="12" font-weight="700" fill="#98a2b3">Renglón 2</text>
+            <text x="16" y="152" font-size="12" font-weight="700" fill="#98a2b3">Renglón 3</text>
+            <text x="16" y="210" font-size="12" font-weight="700" fill="#f7de8a">Renglón 4</text>
+
+            <circle cx="300" cy="36" r="14" fill="#d4a63b"/><text x="300" y="40" text-anchor="middle" font-size="11" fill="#14161d" font-weight="800">100%</text>
+            <circle cx="225" cy="92" r="13" fill="#e5c158"/><text x="225" y="96" text-anchor="middle" font-size="10" fill="#14161d" font-weight="800">50%</text>
+            <circle cx="375" cy="92" r="13" fill="#e5c158"/><text x="375" y="96" text-anchor="middle" font-size="10" fill="#14161d" font-weight="800">50%</text>
+            <circle cx="150" cy="148" r="13" fill="#f5e6c8"/><text x="150" y="152" text-anchor="middle" font-size="10" fill="#14161d" font-weight="800">25%</text>
+            <circle cx="300" cy="148" r="13" fill="#f5e6c8"/><text x="300" y="152" text-anchor="middle" font-size="10" fill="#14161d" font-weight="800">50%</text>
+            <circle cx="450" cy="148" r="13" fill="#f5e6c8"/><text x="450" y="152" text-anchor="middle" font-size="10" fill="#14161d" font-weight="800">25%</text>
+
+            <rect x="35" y="188" width="80" height="44" rx="8" fill="#262b3b" stroke="#e5c158" stroke-width="1.5"/>
+            <text x="75" y="206" text-anchor="middle" font-size="11" font-weight="800" fill="#f5e6c8">Pos 0 (1/8)</text>
+            <text x="75" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#e5c158">12.5% bolas</text>
+
+            <rect x="180" y="188" width="90" height="44" rx="8" fill="rgba(224,138,68,0.22)" stroke="#e08a44" stroke-width="2"/>
+            <text x="225" y="206" text-anchor="middle" font-size="11" font-weight="800" fill="#ffedd5">Pos 1 (3/8)</text>
+            <text x="225" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#fbbf77">37.5% bolas</text>
+
+            <rect x="330" y="188" width="90" height="44" rx="8" fill="rgba(224,138,68,0.22)" stroke="#e08a44" stroke-width="2"/>
+            <text x="375" y="206" text-anchor="middle" font-size="11" font-weight="800" fill="#ffedd5">Pos 2 (3/8)</text>
+            <text x="375" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#fbbf77">37.5% bolas</text>
+
+            <rect x="485" y="188" width="80" height="44" rx="8" fill="#262b3b" stroke="#e5c158" stroke-width="1.5"/>
+            <text x="525" y="206" text-anchor="middle" font-size="11" font-weight="800" fill="#f5e6c8">Pos 3 (1/8)</text>
+            <text x="525" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#e5c158">12.5% bolas</text>
+
+            <text x="300" y="252" text-anchor="middle" font-size="11" font-weight="700" fill="#f7de8a">
+              Fórmula: Δμ = -0.20 × P(visitar nodo) → Centro (-0.075) es 3× mayor que Extremos (-0.025)
+            </text>
+          </svg>
+        </div>
+
+        <div class="card">
+          <h2>Tabla Comparativa — Etapa 2 (X = 10, N = 100, R = 1.000 réplicas)</h2>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Escenario</th>
+                  <th>Tráfico nodo</th>
+                  <th>μ exacta</th>
+                  <th>Δμ</th>
+                  <th>Desvío MC</th>
+                  <th>Asim. exacta</th>
+                  <th>p mediano χ²</th>
+                  <th>% Rechazo χ²</th>
+                </tr>
+              </thead>
+              <tbody id="tableStage2Body"></tbody>
+            </table>
+          </div>
+          <div class="hint-box" style="margin-top:12px;">
+            <strong>Lectura clave para la defensa:</strong><br/>
+            1) <strong>Pos 1 y Pos 2 (centro):</strong> triplican el corrimiento de la media (Δμ = -0.075 vs. -0.025).<br/>
+            2) <strong>Mitad izquierda (Pos 0, Pos 1):</strong> manda bolas más al borde izquierdo → <em>aumenta</em> el desvío (s ≈ 1.600).<br/>
+            3) <strong>Mitad derecha (Pos 2, Pos 3):</strong> devuelve bolas hacia el centro → <em>reduce</em> el desvío (s ≈ 1.554).<br/>
+            4) Con N = 100 bolas y 6 renglones sanos debajo, el sesgo máximo equivale al 4.7% de σ, por lo que χ² individual rara vez lo detecta (~6.2%–6.6% de rechazo).
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="img-card">
+          <img src="output/etapa2_comparacion_columnas_defecto.png" alt="Comparación de columnas Etapa 2" onclick="openModal(this.src)" />
+          <p><strong>Comparación visual sin defecto vs. cada ubicación en el 4.º renglón:</strong> Gráfico de columnas para X = 10 con N = 100 bolas.</p>
+        </div>
+        <div class="img-card">
+          <img src="output/etapa2_analisis_trafico_e_impacto.png" alt="Tráfico e impacto Etapa 2" onclick="openModal(this.src)" />
+          <p><strong>Análisis estructural:</strong> Tráfico nodal en el 4.º renglón (12.5% / 37.5% / 37.5% / 12.5%), comparación de Δμ y asimetría, y superposición de curvas exactas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 4: GUION DE DEMO -->
+    <section id="tab-guion" class="tab-panel">
+      <div class="card" style="margin-bottom:16px;">
+        <h2>Guion Rápido de 3 Minutos para Presentar al Profesor</h2>
+        <p style="margin:0;color:var(--text-soft);font-size:0.9rem;">
+          Hacé clic en cualquier paso para cargar automáticamente el escenario con animación en el Simulador en Vivo y leer la explicación lista para decir.
+        </p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-text">
+          <h3>Paso 1 — Mostrar cómo funciona el modelo físico (Figura del TP: X = 4)</h3>
+          <p>Mostrale el tablero del enunciado con 4 renglones y 5 copas, lanzando 1 bola en cámara lenta o N = 100 bolas.</p>
+          <div class="quote-say">
+            <strong>Qué decir:</strong> "Cada bola entra por arriba y en cada triángulo sano decide izquierda o derecha con 50% de probabilidad, como tirar una moneda X veces. Con X = 4 renglones (como en el dibujo del enunciado) solo hay 5 copas y la forma queda muy achatada (curtosis -0.50), por eso no alcanza todavía una normalidad estructural aceptable."
+          </div>
+        </div>
+        <button class="btn-action btn-gold" style="width:auto;" onclick="loadDemoScenario(4, 100, 'none', 'slow')">Cargar Paso 1 (X = 4)</button>
+      </div>
+
+      <div class="step-card" style="border-left-color:var(--green);">
+        <div class="step-text">
+          <h3>Paso 2 — Demostrar el mínimo necesario (X_mín = 10 renglones)</h3>
+          <p>Cambiá a 10 renglones (11 copas) y corré 1.000 réplicas Monte Carlo para que no dependa de la suerte de una sola corrida.</p>
+          <div class="quote-say">
+            <strong>Qué decir:</strong> "Probamos de X = 3 a X = 15 haciendo 1.000 réplicas de 100 bolas. Elegimos Chi-cuadrado contra la Normal Discretizada (con corrección por continuidad y regla de Cochran E_i ≥ 5) porque los datos son conteos discretos en copas; Shapiro-Wilk crudo falla ~100% por la cantidad de empates enteros. Sumando De Moivre-Laplace (X·p ≥ 5) y D'Agostino K², el mínimo consistente es X = 10 renglones."
+          </div>
+        </div>
+        <button class="btn-action btn-champagne-outline" style="width:auto;" onclick="loadDemoScenario(10, 100, 'none', 'mc')">Cargar Paso 2 (X = 10 MC)</button>
+      </div>
+
+      <div class="step-card" style="border-left-color:var(--rose-defect);">
+        <div class="step-text">
+          <h3>Paso 3 — Etapa 2: Defecto en un extremo del 4.º renglón (Pos 0)</h3>
+          <p>Activá el defecto 70% izquierda / 30% derecha en la Posición 0 (borde izquierdo del 4.º renglón) y simulá 1.000 corridas.</p>
+          <div class="quote-say">
+            <strong>Qué decir:</strong> "Si el triángulo fallado cae en un extremo del 4.º renglón (Posición 0 o 3), apenas el 12.5% de las bolas pasa por ahí (1 de cada 8 caminos). El corrimiento hacia la izquierda de la media es mínimo: Δμ = -0.025 (baja de 5.000 a 4.975), y en el borde izquierdo ensancha levemente la cola izquierda."
+          </div>
+        </div>
+        <button class="btn-action btn-mc" style="width:auto;" onclick="loadDemoScenario(10, 100, '0', 'mc')">Cargar Paso 3 (Defecto Pos 0)</button>
+      </div>
+
+      <div class="step-card" style="border-left-color:var(--red);">
+        <div class="step-text">
+          <h3>Paso 4 — Etapa 2: Defecto en el centro del 4.º renglón (Pos 1 o Pos 2)</h3>
+          <p>Mové el defecto al nodo central (Posición 1 ó 2) para comparar contra el extremo.</p>
+          <div class="quote-say">
+            <strong>Qué decir:</strong> "En cambio, si el defecto cae en el centro del 4.º renglón (Posición 1 o 2), pasa el 37.5% de las bolas (el triple de tráfico). Por eso el impacto sobre la media se triplica a Δμ = -0.075. Además, Pos 1 empuja bolas hacia el borde aumentando la varianza, mientras Pos 2 las devuelve al centro reduciendo la varianza. Como abajo quedan 6 renglones sanos y N=100 es una muestra chica, el desplazamiento equivale al 4.7% de σ y el test χ² rara vez rechaza en una sola corrida."
+          </div>
+        </div>
+        <button class="btn-action btn-mc" style="width:auto;background:#b91c1c;" onclick="loadDemoScenario(10, 100, '1', 'mc')">Cargar Paso 4 (Defecto Pos 1)</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal zoom imágenes -->
+  <div id="imgModal" class="modal" onclick="this.classList.remove('open')">
+    <img id="modalImg" src="" alt="Vista ampliada" />
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. TABLAS VERIFICADAS DE ETAPA 1 Y ETAPA 2
+    // =========================================================================
+    const STAGE1_TABLE = [
+      { x: 3, bins: 4, eff: 4, df: 3, chi2: 3.05, pMed: 0.483, accChi2: 95.1, accK2: 81.3, accSW: 0.0, kurt: -0.667, verdict: "NO ACEPTABLE" },
+      { x: 4, bins: 5, eff: 5, df: 4, chi2: 4.13, pMed: 0.497, accChi2: 94.3, accK2: 93.3, accSW: 0.0, kurt: -0.500, verdict: "NO ACEPTABLE" },
+      { x: 5, bins: 6, eff: 4, df: 3, chi2: 3.05, pMed: 0.482, accChi2: 94.8, accK2: 95.3, accSW: 0.0, kurt: -0.400, verdict: "NO ACEPTABLE" },
+      { x: 6, bins: 7, eff: 5, df: 4, chi2: 4.02, pMed: 0.489, accChi2: 95.4, accK2: 95.3, accSW: 0.0, kurt: -0.333, verdict: "NO ACEPTABLE" },
+      { x: 7, bins: 8, eff: 6, df: 5, chi2: 5.09, pMed: 0.481, accChi2: 94.4, accK2: 96.9, accSW: 0.0, kurt: -0.286, verdict: "TRANSICIÓN" },
+      { x: 8, bins: 9, eff: 5, df: 4, chi2: 3.97, pMed: 0.480, accChi2: 95.1, accK2: 96.1, accSW: 0.0, kurt: -0.250, verdict: "TRANSICIÓN" },
+      { x: 9, bins: 10, eff: 6, df: 5, chi2: 4.94, pMed: 0.502, accChi2: 95.8, accK2: 96.9, accSW: 0.0, kurt: -0.222, verdict: "TRANSICIÓN" },
+      { x: 10, bins: 11, eff: 7, df: 6, chi2: 6.02, pMed: 0.515, accChi2: 95.0, accK2: 96.4, accSW: 0.0, kurt: -0.200, verdict: "NORMAL ACEPTABLE" },
+      { x: 11, bins: 12, eff: 6, df: 5, chi2: 4.90, pMed: 0.494, accChi2: 95.7, accK2: 94.7, accSW: 0.0, kurt: -0.182, verdict: "NORMAL ACEPTABLE" },
+      { x: 12, bins: 13, eff: 7, df: 6, chi2: 6.36, pMed: 0.451, accChi2: 93.6, accK2: 95.6, accSW: 0.4, kurt: -0.167, verdict: "NORMAL ACEPTABLE" },
+      { x: 13, bins: 14, eff: 6, df: 5, chi2: 4.90, pMed: 0.504, accChi2: 94.9, accK2: 97.0, accSW: 0.5, kurt: -0.154, verdict: "NORMAL ACEPTABLE" },
+      { x: 14, bins: 15, eff: 7, df: 6, chi2: 5.94, pMed: 0.500, accChi2: 95.5, accK2: 96.5, accSW: 1.9, kurt: -0.143, verdict: "NORMAL ACEPTABLE" },
+      { x: 15, bins: 16, eff: 8, df: 7, chi2: 6.92, pMed: 0.501, accChi2: 94.8, accK2: 95.8, accSW: 4.9, kurt: -0.133, verdict: "NORMAL ACEPTABLE" }
+    ];
+
+    const STAGE2_TABLE = [
+      { name: "Sin defecto (Base 50/50)", traffic: "100.0%", mu: "5.000", dmu: "0.000", std: "1.576", skew: "0.0000", pMed: "0.504", rej: "6.2%" },
+      { name: "Posición 0 (Ext. Izq.)", traffic: "12.5%", mu: "4.975", dmu: "-0.025", std: "1.600", skew: "-0.0229", pMed: "0.486", rej: "5.5%" },
+      { name: "Posición 1 (Centro-Izq.)", traffic: "37.5%", mu: "4.925", dmu: "-0.075", std: "1.599", skew: "+0.0403", pMed: "0.457", rej: "6.2%" },
+      { name: "Posición 2 (Centro-Der.)", traffic: "37.5%", mu: "4.925", dmu: "-0.075", std: "1.553", skew: "+0.0352", pMed: "0.457", rej: "6.6%" },
+      { name: "Posición 3 (Ext. Der.)", traffic: "12.5%", mu: "4.975", dmu: "-0.025", std: "1.554", skew: "-0.0280", pMed: "0.490", rej: "4.1%" },
+      { name: "Posición Aleatoria (Prom.)", traffic: "25.0%", mu: "4.950", dmu: "-0.050", std: "1.577", skew: "+0.0063", pMed: "0.474", rej: "6.1%" }
+    ];
+
+    // =========================================================================
+    // 2. MOTOR ESTADÍSTICO EN JS
+    // =========================================================================
+    function erf(x) {
+      const sign = x >= 0 ? 1 : -1;
+      const ax = Math.abs(x);
+      const t = 1.0 / (1.0 + 0.3275911 * ax);
+      const y = 1.0 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-ax * ax);
+      return sign * y;
+    }
+
+    function normalCDF(x, mu, sigma) {
+      return 0.5 * (1.0 + erf((x - mu) / (sigma * Math.SQRT2)));
+    }
+
+    function normalPDF(x, mu, sigma) {
+      const z = (x - mu) / sigma;
+      return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2.0 * Math.PI));
+    }
+
+    function logGamma(z) {
+      const cof = [
+        76.18009172947146, -86.50532032941677, 24.01409824083091,
+        -1.231739572450155, 0.001208650973866179, -0.000005395239384953
+      ];
+      let y = z, x = z;
+      let tmp = x + 5.5;
+      tmp -= (x + 0.5) * Math.log(tmp);
+      let ser = 1.000000000190015;
+      for (let j = 0; j < 6; j++) { y += 1.0; ser += cof[j] / y; }
+      return -tmp + Math.log(2.5066282746310005 * ser / x);
+    }
+
+    function gammaQ(a, x) {
+      if (x <= 0) return 1.0;
+      if (x < a + 1.0) {
+        let ap = a, del = 1.0 / a, sum = del;
+        for (let n = 1; n <= 200; n++) {
+          ap += 1.0;
+          del *= x / ap;
+          sum += del;
+          if (Math.abs(del) < Math.abs(sum) * 1e-12) break;
+        }
+        const p = sum * Math.exp(-x + a * Math.log(x) - logGamma(a));
+        return Math.max(0.0, Math.min(1.0, 1.0 - p));
+      } else {
+        let b = x + 1.0 - a, c = 1.0 / 1e-30, d = 1.0 / b, h = d;
+        for (let i = 1; i <= 200; i++) {
+          const an = -i * (i - a);
+          b += 2.0;
+          d = an * d + b;
+          if (Math.abs(d) < 1e-30) d = 1e-30;
+          c = b + an / c;
+          if (Math.abs(c) < 1e-30) c = 1e-30;
+          d = 1.0 / d;
+          const del = d * c;
+          h *= del;
+          if (Math.abs(del - 1.0) < 1e-12) break;
+        }
+        const q = Math.exp(-x + a * Math.log(x) - logGamma(a)) * h;
+        return Math.max(0.0, Math.min(1.0, q));
+      }
+    }
+
+    function discretizedNormalExpected(numRows, numBalls, mu, sigma) {
+      const exp = new Array(numRows + 1).fill(0);
+      const cdfs = [];
+      for (let k = 0; k < numRows; k++) cdfs.push(normalCDF(k + 0.5, mu, sigma));
+      exp[0] = cdfs[0] * numBalls;
+      for (let k = 1; k < numRows; k++) exp[k] = (cdfs[k] - cdfs[k - 1]) * numBalls;
+      exp[numRows] = (1.0 - cdfs[numRows - 1]) * numBalls;
+      return exp;
+    }
+
+    function poolTailsCochran(observed, expected, minExpected = 5.0) {
+      const obs = observed.map(Number);
+      const exp = expected.map(Number);
+      while (exp.length > 1 && (exp[0] < minExpected || exp[exp.length - 1] < minExpected)) {
+        if (exp[0] < minExpected && (exp[0] <= exp[exp.length - 1] || exp[exp.length - 1] >= minExpected)) {
+          obs[1] += obs[0]; exp[1] += exp[0]; obs.shift(); exp.shift();
+        } else {
+          obs[obs.length - 2] += obs[obs.length - 1]; exp[exp.length - 2] += exp[exp.length - 1]; obs.pop(); exp.pop();
+        }
+      }
+      return { obs, exp, effectiveBins: exp.length };
+    }
+
+    function chiSquareTest(counts, expected) {
+      const totalObs = counts.reduce((a, b) => a + b, 0);
+      if (totalObs === 0) return { stat: NaN, pVal: NaN, df: 0, effectiveBins: 0 };
+      const minExp = totalObs >= 25 ? 5.0 : Math.max(1.0, totalObs * 0.15);
+      const { obs, exp, effectiveBins } = poolTailsCochran(counts, expected, minExp);
+      const df = effectiveBins - 1;
+      if (df <= 0) return { stat: NaN, pVal: NaN, df, effectiveBins };
+      let stat = 0;
+      for (let i = 0; i < obs.length; i++) {
+        const diff = obs[i] - exp[i];
+        stat += (diff * diff) / exp[i];
+      }
+      return { stat, pVal: gammaQ(df / 2.0, stat / 2.0), df, effectiveBins };
+    }
+
+    function computeExactDistribution(numRows, defectCol) {
+      let probs = [1.0];
+      for (let row = 1; row <= numRows; row++) {
+        const next = new Array(row + 1).fill(0);
+        for (let j = 0; j < row; j++) {
+          const pLeft = (row === 4 && defectCol !== null && j === defectCol) ? 0.70 : 0.50;
+          next[j] += probs[j] * pLeft;
+          next[j + 1] += probs[j] * (1.0 - pLeft);
+        }
+        probs = next;
+      }
+      return probs;
+    }
+
+    function computeExactMarginal(numRows, defectMode) {
+      if (defectMode === "none" || numRows < 4) return computeExactDistribution(numRows, null);
+      if (defectMode === "random") {
+        const mix = new Array(numRows + 1).fill(0);
+        for (let col = 0; col < 4; col++) {
+          const p = computeExactDistribution(numRows, col);
+          for (let k = 0; k <= numRows; k++) mix[k] += p[k] / 4.0;
+        }
+        return mix;
+      }
+      return computeExactDistribution(numRows, Number(defectMode));
+    }
+
+    function simulateBallPath(numRows, activeDefectCol) {
+      let col = 0;
+      const path = [{ row: 0, col: 0 }];
+      let row4Node = null;
+      for (let r = 1; r <= numRows; r++) {
+        if (r === 4) row4Node = col;
+        const pLeft = (r === 4 && activeDefectCol !== null && col === activeDefectCol) ? 0.70 : 0.50;
+        if (Math.random() >= pLeft) col += 1;
+        path.push({ row: r, col });
+      }
+      return { finalBin: col, path, row4Node };
+    }
+
+    function computeSampleStatsFromCounts(counts) {
+      const n = counts.reduce((a, b) => a + b, 0);
+      if (n === 0) return null;
+      let sum = 0;
+      for (let k = 0; k < counts.length; k++) sum += k * counts[k];
+      const mean = sum / n;
+      let m2 = 0, m3 = 0, m4 = 0;
+      for (let k = 0; k < counts.length; k++) {
+        const d = k - mean;
+        m2 += counts[k] * d * d;
+        m3 += counts[k] * d * d * d;
+        m4 += counts[k] * d * d * d * d;
+      }
+      const std = Math.sqrt(n > 1 ? m2 / (n - 1) : 0);
+      const varPop = m2 / n;
+      const skew = varPop > 0 ? (m3 / n) / Math.pow(varPop, 1.5) : 0;
+      const kurtExcess = varPop > 0 ? (m4 / n) / (varPop * varPop) - 3.0 : 0;
+      return { n, mean, std, skew, kurtExcess };
+    }
+
+    // =========================================================================
+    // 3. ESTADO DEL SIMULADOR, PARTÍCULAS Y ANIMACIÓN CONTINUA
+    // =========================================================================
+    const state = {
+      numRows: 10,
+      numBalls: 100,
+      targetBalls: 100,
+      defectMode: "none",
+      activeDefectCol: null,
+      counts: new Array(11).fill(0),
+      chartDisplayCounts: new Array(11).fill(0),
+      row4Visits: [0, 0, 0, 0],
+      flyingBalls: [],
+      pendingQueue: [],
+      pegFlashes: new Map(), // "r,c" -> intensity 0..1
+      bubbles: [],
+      highlightPath: null,
+      mcSummary: null,
+      animFrameId: null,
+      lastFrameTime: 0,
+      spawnAccMs: 0,
+      spawnIntervalMs: 30,
+      stepDurationMs: 88,
+      isRunning: false,
+      pegCoords: []
+    };
+
+    const boardCanvas = document.getElementById("boardCanvas");
+    const boardCtx = boardCanvas.getContext("2d");
+    const chartCanvas = document.getElementById("chartCanvas");
+    const chartCtx = chartCanvas.getContext("2d");
+
+    function getBoardGeometry() {
+      const W = boardCanvas.width;
+      const H = boardCanvas.height;
+      const X = state.numRows;
+      const topY = 58;
+      const binAreaH = 136;
+      const boardBottomY = H - binAreaH;
+      const rowHeight = (boardBottomY - topY - 26) / X;
+      const maxSpanW = W - 110;
+      const colStep = Math.min(44, maxSpanW / (X + 0.5));
+      const pegRadius = Math.max(5.5, Math.min(12.5, colStep * 0.27));
+      return { W, H, X, topY, boardBottomY, binAreaH, rowHeight, colStep, pegRadius };
+    }
+
+    function getPegXY(row, col, geom) {
+      const cx = geom.W / 2;
+      if (row === 0) return { x: cx, y: geom.topY - 26 };
+      const y = geom.topY + (row - 1) * geom.rowHeight + 12;
+      const x = cx + (col - (row - 1) / 2.0) * geom.colStep;
+      return { x, y };
+    }
+
+    function getBinXY(binIdx, geom) {
+      const cx = geom.W / 2;
+      const x = cx + (binIdx - geom.X / 2.0) * geom.colStep;
+      return { x, yTop: geom.boardBottomY, yBottom: geom.H - 22 };
+    }
+
+    function drawBoard() {
+      const geom = getBoardGeometry();
+      const { W, H, X, boardBottomY, colStep, pegRadius } = geom;
+      const ctx = boardCtx;
+      ctx.clearRect(0, 0, W, H);
+
+      // Fondo negro claro elegante
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+      bgGrad.addColorStop(0, "#171a24");
+      bgGrad.addColorStop(1, "#12141c");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      const leftBaseX = getBinXY(0, geom).x - colStep * 0.58;
+      const rightBaseX = getBinXY(X, geom).x + colStep * 0.58;
+
+      // Embudo superior dorado
+      ctx.strokeStyle = "#e5c158";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(W / 2 - 48, 8);
+      ctx.lineTo(W / 2 - 14, 34);
+      ctx.moveTo(W / 2 + 48, 8);
+      ctx.lineTo(W / 2 + 14, 34);
+      ctx.stroke();
+
+      // Cristal lateral (dos vidrios)
+      ctx.strokeStyle = "rgba(229, 193, 88, 0.36)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(leftBaseX - 8, 35, (rightBaseX - leftBaseX) + 16, H - 46);
+
+      // Banda del 4.º renglón
+      if (X >= 4) {
+        const y4 = getPegXY(4, 0, geom).y;
+        ctx.fillStyle = "rgba(224, 138, 68, 0.09)";
+        ctx.fillRect(leftBaseX - 6, y4 - pegRadius - 8, (rightBaseX - leftBaseX) + 12, pegRadius * 2 + 16);
+        ctx.fillStyle = "#f09d51";
+        ctx.font = "bold 11px Segoe UI, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText("4.º renglón", leftBaseX, y4 - pegRadius - 11);
+      }
+
+      // Camino resaltado en cámara lenta
+      if (state.highlightPath && state.highlightPath.length > 1) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(247, 222, 138, 0.75)";
+        ctx.lineWidth = 3.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        state.highlightPath.forEach((pt, idx) => {
+          const p = pt.row < X ? getPegXY(pt.row + 1, pt.col, geom) : { x: getBinXY(pt.col, geom).x, y: boardBottomY };
+          if (idx === 0) {
+            const start = getPegXY(0, 0, geom);
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(p.x, p.y);
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Triángulos clavados
+      state.pegCoords = [];
+      for (let r = 1; r <= X; r++) {
+        for (let j = 0; j < r; j++) {
+          const { x, y } = getPegXY(r, j, geom);
+          const isDefect = (r === 4 && state.activeDefectCol !== null && j === state.activeDefectCol);
+          const isRow4 = (r === 4);
+          const flash = state.pegFlashes.get(`${r},${j}`) || 0;
+
+          if (flash > 0.02) {
+            ctx.beginPath();
+            ctx.arc(x, y, pegRadius + 5 + flash * 5, 0, Math.PI * 2);
+            ctx.fillStyle = isDefect
+              ? `rgba(224, 138, 68, ${flash * 0.45})`
+              : `rgba(247, 222, 138, ${flash * 0.40})`;
+            ctx.fill();
+          }
+
+          ctx.beginPath();
+          ctx.moveTo(x, y - pegRadius);
+          ctx.lineTo(x - pegRadius, y + pegRadius * 0.85);
+          ctx.lineTo(x + pegRadius, y + pegRadius * 0.85);
+          ctx.closePath();
+
+          if (isDefect) {
+            ctx.fillStyle = "#e08a44";
+            ctx.strokeStyle = "#ffedd5";
+            ctx.lineWidth = 2.1;
+          } else if (isRow4) {
+            ctx.fillStyle = flash > 0.2 ? "#f7de8a" : "#323b52";
+            ctx.strokeStyle = "#e5c158";
+            ctx.lineWidth = 1.6;
+          } else {
+            ctx.fillStyle = flash > 0.2 ? "#f5e6c8" : "#272d3d";
+            ctx.strokeStyle = "rgba(245, 230, 200, 0.55)";
+            ctx.lineWidth = 1.3;
+          }
+          ctx.fill();
+          ctx.stroke();
+
+          if (isRow4) {
+            state.pegCoords.push({ row: r, col: j, x, y, r: pegRadius + 7 });
+            if (isDefect) {
+              ctx.fillStyle = "#ffedd5";
+              ctx.font = "bold 10px Segoe UI, sans-serif";
+              ctx.textAlign = "center";
+              ctx.fillText("70%⬅ ➡30%", x, y + pegRadius + 13);
+            }
+          }
+        }
+      }
+
+      // Copas de champagne en la base
+      const currentCounts = state.mcSummary ? state.mcSummary.meanCounts : state.counts;
+      const maxCount = Math.max(12, ...currentCounts, state.targetBalls * 0.30);
+      const binHeightAvail = geom.binAreaH - 36;
+
+      for (let k = 0; k <= X; k++) {
+        const { x, yTop, yBottom } = getBinXY(k, geom);
+        const bw = colStep * 0.82;
+        const c = currentCounts[k];
+
+        // Líquido champagne dorado dentro de la copa
+        if (c > 0.05) {
+          const fillH = Math.min(binHeightAvail, (c / maxCount) * binHeightAvail);
+          const liqTop = yBottom - 8 - fillH;
+          const grad = ctx.createLinearGradient(0, liqTop, 0, yBottom - 8);
+          if (state.defectMode !== "none" && X >= 4) {
+            grad.addColorStop(0, "rgba(247, 206, 128, 0.95)");
+            grad.addColorStop(1, "rgba(205, 114, 42, 0.92)");
+          } else {
+            grad.addColorStop(0, "rgba(251, 243, 220, 0.96)");
+            grad.addColorStop(0.25, "rgba(229, 193, 88, 0.92)");
+            grad.addColorStop(1, "rgba(176, 130, 32, 0.92)");
+          }
+          ctx.fillStyle = grad;
+          ctx.fillRect(x - bw / 2 + 2, liqTop, bw - 4, fillH);
+
+          // Espuma brillante arriba del líquido
+          ctx.fillStyle = "rgba(255, 251, 235, 0.88)";
+          ctx.fillRect(x - bw / 2 + 2, liqTop, bw - 4, 2.5);
+        }
+
+        // Burbujas ascendentes dentro de la copa
+        for (const bub of state.bubbles) {
+          if (bub.bin === k) {
+            ctx.beginPath();
+            ctx.arc(x + bub.dx * (bw * 0.28), bub.y, bub.size, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255, 250, 230, 0.75)";
+            ctx.fill();
+          }
+        }
+
+        // Contorno copa de cristal + pie
+        ctx.strokeStyle = "rgba(245, 230, 200, 0.72)";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(x - bw / 2, yTop);
+        ctx.lineTo(x - bw / 2, yBottom - 10);
+        ctx.quadraticCurveTo(x, yBottom - 1, x + bw / 2, yBottom - 10);
+        ctx.lineTo(x + bw / 2, yTop);
+        ctx.stroke();
+
+        // Tallo y base de la copa
+        ctx.strokeStyle = "rgba(229, 193, 88, 0.55)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, yBottom - 5);
+        ctx.lineTo(x, yBottom + 5);
+        ctx.moveTo(x - bw * 0.28, yBottom + 5);
+        ctx.lineTo(x + bw * 0.28, yBottom + 5);
+        ctx.stroke();
+
+        // Conteo encima/dentro y etiqueta k
+        ctx.fillStyle = "#fff8e7";
+        ctx.font = "bold 10px Segoe UI, sans-serif";
+        ctx.textAlign = "center";
+        const labelVal = state.mcSummary ? c.toFixed(1) : String(Math.round(c));
+        ctx.fillText(labelVal, x, yTop - 4);
+
+        ctx.fillStyle = "#a7b0c0";
+        ctx.font = "10px Segoe UI, sans-serif";
+        ctx.fillText(String(k), x, H - 3);
+      }
+
+      // Bolas doradas en vuelo con estela luminosa
+      const ballR = Math.max(4.4, pegRadius * 0.62);
+      for (const ball of state.flyingBalls) {
+        if (ball.trail && ball.trail.length > 1) {
+          for (let i = 0; i < ball.trail.length - 1; i++) {
+            const alpha = ((i + 1) / ball.trail.length) * 0.35;
+            ctx.beginPath();
+            ctx.arc(ball.trail[i].x, ball.trail[i].y, ballR * (0.45 + 0.45 * (i / ball.trail.length)), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(247, 222, 138, ${alpha})`;
+            ctx.fill();
+          }
+        }
+        const bGrad = ctx.createRadialGradient(ball.x - ballR * 0.3, ball.y - ballR * 0.3, 1, ball.x, ball.y, ballR);
+        bGrad.addColorStop(0, "#fffbeb");
+        bGrad.addColorStop(0.5, "#f5d882");
+        bGrad.addColorStop(1, "#b8841e");
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ballR, 0, Math.PI * 2);
+        ctx.fillStyle = bGrad;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 250, 230, 0.8)";
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+    }
+
+    function drawChart() {
+      const W = chartCanvas.width;
+      const H = chartCanvas.height;
+      const ctx = chartCtx;
+      const X = state.numRows;
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.fillStyle = "#151822";
+      ctx.fillRect(0, 0, W, H);
+
+      const padL = 42, padR = 16, padT = 30, padB = 34;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      const displayCounts = state.chartDisplayCounts;
+      const targetCounts = state.mcSummary ? state.mcSummary.meanCounts : state.counts;
+      const totalN = targetCounts.reduce((a, b) => a + b, 0);
+      const scaleN = totalN > 0 ? totalN : state.targetBalls;
+      const muBase = X / 2.0;
+      const sigmaBase = Math.sqrt(X) / 2.0;
+      const expDisc = discretizedNormalExpected(X, scaleN, muBase, sigmaBase);
+      const exactModel = computeExactMarginal(X, state.defectMode).map(p => p * scaleN);
+
+      const maxVal = Math.max(10, ...expDisc, ...exactModel, ...displayCounts, ...targetCounts);
+      const yMax = maxVal * 1.20;
+
+      // Líneas de grilla
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.lineWidth = 1;
+      ctx.font = "10px Segoe UI, sans-serif";
+      ctx.fillStyle = "#98a2b3";
+      ctx.textAlign = "right";
+      for (let g = 0; g <= 4; g++) {
+        const val = (yMax * g) / 4;
+        const py = padT + plotH - (val / yMax) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(padL, py);
+        ctx.lineTo(W - padR, py);
+        ctx.stroke();
+        ctx.fillText(val >= 10 ? val.toFixed(0) : val.toFixed(1), padL - 6, py + 3);
+      }
+
+      const stepW = plotW / (X + 1);
+      const barW = stepW * 0.72;
+
+      for (let k = 0; k <= X; k++) {
+        const cx = padL + (k + 0.5) * stepW;
+        const val = displayCounts[k] || 0;
+        const bh = (val / yMax) * plotH;
+        const by = padT + plotH - bh;
+
+        const barGrad = ctx.createLinearGradient(0, by, 0, padT + plotH);
+        if (state.defectMode !== "none" && X >= 4) {
+          barGrad.addColorStop(0, "rgba(240, 157, 81, 0.92)");
+          barGrad.addColorStop(1, "rgba(184, 88, 29, 0.82)");
+          ctx.strokeStyle = "#ffedd5";
+        } else {
+          barGrad.addColorStop(0, "rgba(245, 216, 130, 0.94)");
+          barGrad.addColorStop(1, "rgba(184, 139, 38, 0.80)");
+          ctx.strokeStyle = "#fbf3dc";
+        }
+
+        ctx.fillStyle = barGrad;
+        ctx.lineWidth = 1.0;
+        ctx.fillRect(cx - barW / 2, by, barW, bh);
+        if (bh > 1) ctx.strokeRect(cx - barW / 2, by, barW, bh);
+
+        if (state.mcSummary) {
+          const sd = state.mcSummary.stdCounts[k];
+          const yTopErr = padT + plotH - ((val + sd) / yMax) * plotH;
+          const yBotErr = padT + plotH - (Math.max(0, val - sd) / yMax) * plotH;
+          ctx.strokeStyle = "#f7f2e7";
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(cx, yTopErr);
+          ctx.lineTo(cx, yBotErr);
+          ctx.moveTo(cx - 3, yTopErr);
+          ctx.lineTo(cx + 3, yTopErr);
+          ctx.moveTo(cx - 3, yBotErr);
+          ctx.lineTo(cx + 3, yBotErr);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "#d6cfc0";
+        ctx.font = "10px Segoe UI, sans-serif";
+        ctx.textAlign = "center";
+        if (X <= 12 || k % 2 === 0) ctx.fillText(String(k), cx, H - 14);
+      }
+
+      // Curva Normal Continua
+      ctx.strokeStyle = "#f87171";
+      ctx.lineWidth = 2.3;
+      ctx.beginPath();
+      const samples = 140;
+      for (let i = 0; i <= samples; i++) {
+        const kx = -0.5 + ((X + 1.0) * i) / samples;
+        const px = padL + ((kx + 0.5) / (X + 1)) * plotW;
+        const val = normalPDF(kx, muBase, sigmaBase) * scaleN;
+        const py = padT + plotH - (val / yMax) * plotH;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      if (state.defectMode !== "none" && X >= 4) {
+        ctx.strokeStyle = "#fbf3dc";
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        for (let k = 0; k <= X; k++) {
+          const px = padL + (k + 0.5) * stepW;
+          const py = padT + plotH - (exactModel[k] / yMax) * plotH;
+          if (k === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Leyenda
+      ctx.font = "10.5px Segoe UI, sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillStyle = state.defectMode !== "none" && X >= 4 ? "#e08a44" : "#e5c158";
+      ctx.fillRect(padL, 9, 10, 10);
+      ctx.fillStyle = "#f7f2e7";
+      ctx.fillText(state.mcSummary ? "Media MC (±1σ)" : "Observado (O_k)", padL + 14, 18);
+
+      ctx.strokeStyle = "#f87171";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(padL + 132, 14);
+      ctx.lineTo(padL + 152, 14);
+      ctx.stroke();
+      ctx.fillText("Normal base", padL + 157, 18);
+
+      if (state.defectMode !== "none" && X >= 4) {
+        ctx.strokeStyle = "#fbf3dc";
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(padL + 238, 14);
+        ctx.lineTo(padL + 258, 14);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillText("Exacta c/defecto", padL + 263, 18);
+      }
+    }
+
+    function updateLiveBinsTable() {
+      const X = state.numRows;
+      const displayCounts = state.mcSummary ? state.mcSummary.meanCounts : state.counts;
+      const totalN = displayCounts.reduce((a, b) => a + b, 0);
+      const scaleN = totalN > 0 ? totalN : state.numBalls;
+      const exp = discretizedNormalExpected(X, scaleN, X / 2.0, Math.sqrt(X) / 2.0);
+      const tbody = document.getElementById("liveBinsBody");
+
+      let html = "";
+      for (let k = 0; k <= X; k++) {
+        const o = displayCounts[k];
+        const e = exp[k];
+        const diff = o - e;
+        const diffStr = `${diff >= 0 ? "+" : ""}${diff.toFixed(1)}`;
+        const obsStr = state.mcSummary ? o.toFixed(1) : String(Math.round(o));
+        html += `<tr>
+          <td>Copa ${k}</td>
+          <td><strong>${obsStr}</strong></td>
+          <td>${e.toFixed(2)}</td>
+          <td style="color:${Math.abs(diff) > Math.max(3, e * 0.25) ? '#fbbf24' : '#34d399'};">${diffStr}</td>
+        </tr>`;
+      }
+      tbody.innerHTML = html;
+    }
+
+    function updateMetricsAndVerdict() {
+      const X = state.numRows;
+      const muBase = X / 2.0;
+      const sigmaBase = Math.sqrt(X) / 2.0;
+      const kurtTheo = -2.0 / X;
+
+      const banner = document.getElementById("verdictBanner");
+      const vTitle = document.getElementById("verdictTitle");
+      const vDesc = document.getElementById("verdictDesc");
+
+      if (state.mcSummary) {
+        const mc = state.mcSummary;
+        const exactProbs = computeExactMarginal(X, state.defectMode);
+        let muExact = 0;
+        for (let k = 0; k <= X; k++) muExact += k * exactProbs[k];
+        const deltaMu = muExact - muBase;
+
+        document.getElementById("kpiBalls").textContent = `1.000 × ${state.targetBalls} bolas`;
+        document.getElementById("kpiStatusSub").textContent = `Monte Carlo completado (X = ${X})`;
+        document.getElementById("kpiProgressBar").style.width = "100%";
+
+        document.getElementById("kpiMean").textContent = `${mc.meanOfMeans.toFixed(3)} (μ=${muBase.toFixed(1)})`;
+        document.getElementById("kpiDeltaMu").textContent = `Δμ exacto = ${deltaMu >= 0 ? "+" : ""}${deltaMu.toFixed(3)}`;
+        document.getElementById("kpiStd").textContent = `${mc.meanOfStds.toFixed(3)} (σ=${sigmaBase.toFixed(2)})`;
+        document.getElementById("kpiSkew").textContent = `Asimetría prom. = ${mc.meanOfSkews >= 0 ? "+" : ""}${mc.meanOfSkews.toFixed(3)}`;
+        document.getElementById("kpiChi2").textContent = `Acep. ${mc.chi2AcceptRate.toFixed(1)}%`;
+        document.getElementById("kpiChi2Sub").textContent = `p med = ${mc.chi2MedianP.toFixed(3)} (${mc.effectiveBins} clases)`;
+        document.getElementById("kpiKurt").textContent = `γ₂ = ${kurtTheo.toFixed(3)}`;
+        document.getElementById("kpiCriterionSub").textContent = `X·p = ${(X * 0.5).toFixed(1)} ${X >= 10 ? "≥ 5 ✓" : "< 5 ✗"}`;
+
+        if (state.defectMode !== "none" && X >= 4) {
+          banner.className = "verdict-banner neutral";
+          vTitle.textContent = `Etapa 2 (1.000 réplicas de N=${state.targetBalls}) — ${getDefectLabel()}`;
+          vDesc.textContent = `Corrimiento exacto Δμ = ${deltaMu.toFixed(3)}. Aceptación χ² vs Normal base: ${mc.chi2AcceptRate.toFixed(1)}% (rechazo ${(100 - mc.chi2AcceptRate).toFixed(1)}%).`;
+        } else if (X >= 10) {
+          banner.className = "verdict-banner ok";
+          vTitle.textContent = `NORMAL ACEPTABLE (X = ${X} ≥ 10, N = ${state.targetBalls})`;
+          vDesc.textContent = `Cumple De Moivre-Laplace (X·p = ${(X * 0.5).toFixed(1)} ≥ 5), |curtosis| ≤ 0.20 y ${mc.chi2AcceptRate.toFixed(1)}% de aceptación χ².`;
+        } else if (X >= 7) {
+          banner.className = "verdict-banner warn";
+          vTitle.textContent = `ZONA DE TRANSICIÓN (X = ${X})`;
+          vDesc.textContent = `χ² acepta (${mc.chi2AcceptRate.toFixed(1)}%), pero aún no cumple X·p ≥ 5 ni |curtosis| ≤ 0.20 (actual: ${kurtTheo.toFixed(3)}).`;
+        } else {
+          banner.className = "verdict-banner bad";
+          vTitle.textContent = `NO ACEPTABLE (X = ${X} insuficiente)`;
+          vDesc.textContent = `Solo ${X + 1} copas y curtosis muy platicúrtica (${kurtTheo.toFixed(3)}). No cumple X·p ≥ 5.`;
+        }
+        updateLiveBinsTable();
+        return;
+      }
+
+      const st = computeSampleStatsFromCounts(state.counts);
+      const landed = st ? st.n : 0;
+      const pct = Math.min(100, (landed / Math.max(1, state.targetBalls)) * 100);
+      document.getElementById("kpiBalls").textContent = `${landed} / ${state.targetBalls} bolas`;
+      document.getElementById("kpiProgressBar").style.width = `${pct.toFixed(1)}%`;
+
+      if (!st) {
+        document.getElementById("kpiStatusSub").textContent = `Listo · X = ${X} renglones`;
+        document.getElementById("kpiMean").textContent = "—";
+        document.getElementById("kpiDeltaMu").textContent = `μ teórica = ${muBase.toFixed(1)}`;
+        document.getElementById("kpiStd").textContent = "—";
+        document.getElementById("kpiSkew").textContent = `σ teórica = ${sigmaBase.toFixed(2)}`;
+        document.getElementById("kpiChi2").textContent = "—";
+        document.getElementById("kpiChi2Sub").textContent = "Cochran E_i ≥ 5";
+        document.getElementById("kpiKurt").textContent = `γ₂ = ${kurtTheo.toFixed(3)}`;
+        document.getElementById("kpiCriterionSub").textContent = `X·p = ${(X * 0.5).toFixed(1)} ${X >= 10 ? "≥ 5 ✓" : "< 5 ✗"}`;
+
+        banner.className = "verdict-banner neutral";
+        vTitle.textContent = `Tablero listo (X = ${X}, N = ${state.numBalls} bolas)`;
+        vDesc.textContent = "Elegí la cantidad de pelotas en la recta o en el campo numérico y presioná Lanzar.";
+        updateLiveBinsTable();
+        return;
+      }
+
+      document.getElementById("kpiStatusSub").textContent = state.isRunning ? "Cayendo con animación..." : `Completado (X = ${X})`;
+      const expected = discretizedNormalExpected(X, st.n, muBase, sigmaBase);
+      const chi2 = chiSquareTest(state.counts, expected);
+      const deltaObs = st.mean - muBase;
+
+      document.getElementById("kpiMean").textContent = `${st.mean.toFixed(2)} (μ=${muBase.toFixed(1)})`;
+      document.getElementById("kpiDeltaMu").textContent = `Δ observado = ${deltaObs >= 0 ? "+" : ""}${deltaObs.toFixed(3)}`;
+      document.getElementById("kpiStd").textContent = `${st.std.toFixed(2)} (σ=${sigmaBase.toFixed(2)})`;
+      document.getElementById("kpiSkew").textContent = `Asimetría = ${st.skew >= 0 ? "+" : ""}${st.skew.toFixed(3)}`;
+      document.getElementById("kpiChi2").textContent = isNaN(chi2.stat) ? "N/A" : `p = ${chi2.pVal.toFixed(3)}`;
+      document.getElementById("kpiChi2Sub").textContent = isNaN(chi2.stat) ? "Muestra muy chica" : `χ²=${chi2.stat.toFixed(2)} · gl=${chi2.df}`;
+      document.getElementById("kpiKurt").textContent = `γ₂ = ${kurtTheo.toFixed(3)}`;
+      document.getElementById("kpiCriterionSub").textContent = `obs=${st.kurtExcess.toFixed(2)} | X·p=${(X * 0.5).toFixed(1)}`;
+
+      if (st.n < 15) {
+        banner.className = "verdict-banner neutral";
+        vTitle.textContent = `Muestra en curso (N = ${st.n} bolas)`;
+        vDesc.textContent = "A medida que llenan las copas se calcula el ajuste contra la campana normal.";
+      } else if (state.defectMode !== "none" && X >= 4) {
+        const pass = !isNaN(chi2.pVal) && chi2.pVal > 0.05;
+        banner.className = pass ? "verdict-banner neutral" : "verdict-banner bad";
+        vTitle.textContent = `Etapa 2 (N = ${st.n}) — ${pass ? "No rechaza Normal base" : "Rechaza Normal base"} (p = ${chi2.pVal.toFixed(3)})`;
+        vDesc.textContent = "En una corrida individual el ruido muestral suele tapar el sesgo del 4.º renglón. Probá N más grande o 1.000 réplicas Monte Carlo.";
+      } else if (X >= 10 && !isNaN(chi2.pVal) && chi2.pVal > 0.05) {
+        banner.className = "verdict-banner ok";
+        vTitle.textContent = `NORMAL ACEPTABLE (X = ${X}, p = ${chi2.pVal.toFixed(3)} > 0.05)`;
+        vDesc.textContent = `Excelente ajuste a N(${muBase.toFixed(1)}, ${(sigmaBase ** 2).toFixed(2)}) y cumple De Moivre-Laplace (X·p = ${(X * 0.5).toFixed(1)} ≥ 5).`;
+      } else if (X < 10) {
+        banner.className = X >= 7 ? "verdict-banner warn" : "verdict-banner bad";
+        vTitle.textContent = X >= 7 ? `TRANSICIÓN (X = ${X} < 10)` : `NO ACEPTABLE (X = ${X} < 10)`;
+        vDesc.textContent = `Todavía no cumple X·p ≥ 5 ni |curtosis| ≤ 0.20 (actual: ${kurtTheo.toFixed(3)}).`;
+      } else {
+        banner.className = "verdict-banner warn";
+        vTitle.textContent = `Fluctuación atípica (~5% de los casos, p = ${chi2.pVal.toFixed(3)})`;
+        vDesc.textContent = "Con α = 0.05, incluso un tablero sano rechaza ~5% por azar. Corré 1.000 réplicas Monte Carlo para verificar el 95% real.";
+      }
+      updateLiveBinsTable();
+    }
+
+    function updateRow4TrafficText() {
+      const el = document.getElementById("row4TrafficSummary");
+      if (state.numRows < 4) {
+        el.textContent = "Tráfico en 4.º renglón: requiere X ≥ 4";
+        return;
+      }
+      const tot = state.row4Visits.reduce((a, b) => a + b, 0);
+      if (tot === 0) {
+        el.textContent = "Tráfico en 4.º renglón: esperando lanzamiento...";
+        return;
+      }
+      const pcts = state.row4Visits.map(v => `${((v / tot) * 100).toFixed(1)}%`);
+      el.textContent = `4.º renglón → Pos0: ${pcts[0]} | Pos1: ${pcts[1]} | Pos2: ${pcts[2]} | Pos3: ${pcts[3]}`;
+    }
+
+    function getDefectLabel() {
+      if (state.defectMode === "none") return "50/50 Sano";
+      if (state.defectMode === "random") return `Aleatorio (Pos ${state.activeDefectCol})`;
+      return `Posición ${state.defectMode} (70/30)`;
+    }
+
+    function resolveActiveDefectCol() {
+      if (state.numRows < 4 || state.defectMode === "none") {
+        state.activeDefectCol = null;
+      } else if (state.defectMode === "random") {
+        state.activeDefectCol = Math.floor(Math.random() * 4);
+      } else {
+        state.activeDefectCol = Number(state.defectMode);
+      }
+
+      const badge = document.getElementById("defectBadge");
+      const modeTag = document.getElementById("modeTag");
+      if (state.numRows < 4 || state.defectMode === "none") {
+        badge.textContent = state.numRows < 4 ? "Requiere X ≥ 4" : "50/50 Sano";
+        badge.style.background = "rgba(245, 230, 200, 0.12)";
+        badge.style.color = "#f7de8a";
+        modeTag.textContent = "Etapa 1";
+      } else {
+        badge.textContent = state.defectMode === "random" ? `Aleatorio → Pos ${state.activeDefectCol}` : `Pos ${state.defectMode} (70/30)`;
+        badge.style.background = "rgba(224, 138, 68, 0.22)";
+        badge.style.color = "#ffedd5";
+        modeTag.textContent = "Etapa 2";
+      }
+    }
+
+    function syncControlsUI() {
+      document.getElementById("ballsSlider").value = Math.min(1000, state.numBalls);
+      document.getElementById("ballsInput").value = state.numBalls;
+      document.getElementById("ballsBadge").textContent = `N = ${state.numBalls}`;
+      document.getElementById("btnRunN").textContent = `▶ Lanzar ${state.numBalls} bolas (Animado)`;
+
+      document.getElementById("rowsSlider").value = state.numRows;
+      document.getElementById("rowsInput").value = state.numRows;
+      document.getElementById("rowsBadge").textContent = `X = ${state.numRows} (${state.numRows + 1} copas)`;
+
+      document.querySelectorAll(".ball-preset").forEach(btn => {
+        btn.classList.toggle("selected", Number(btn.dataset.balls) === state.numBalls);
+      });
+      document.querySelectorAll(".row-preset").forEach(btn => {
+        btn.classList.toggle("selected", Number(btn.dataset.rows) === state.numRows);
+      });
+      document.querySelectorAll(".defect-btn").forEach(btn => {
+        const val = btn.dataset.defect;
+        btn.disabled = (state.numRows < 4 && val !== "none");
+        btn.classList.remove("selected", "defect-selected");
+        if (val === state.defectMode) {
+          btn.classList.add(val === "none" ? "selected" : "defect-selected");
+        }
+      });
+    }
+
+    function ensureAnimationLoop() {
+      if (state.animFrameId !== null) return;
+      state.lastFrameTime = performance.now();
+      state.animFrameId = requestAnimationFrame(tickAnimation);
+    }
+
+    function tickAnimation(now) {
+      const dt = Math.min(50, now - state.lastFrameTime);
+      state.lastFrameTime = now;
+
+      // 1) Despachar nuevas bolas de la cola pendiente
+      if (state.pendingQueue.length > 0) {
+        state.spawnAccMs += dt;
+        while (state.spawnAccMs >= state.spawnIntervalMs && state.pendingQueue.length > 0) {
+          state.spawnAccMs -= state.spawnIntervalMs;
+          const item = state.pendingQueue.shift();
+          if (item.visualOnly) {
+            state.flyingBalls.push(item);
+          } else if (state.flyingBalls.length < 180) {
+            state.flyingBalls.push(item);
+          } else {
+            // Si hay muchísimas bolas simultáneas (ej. N=2000), contabilizar sin saturar el canvas
+            state.counts[item.finalBin] += 1;
+            if (item.row4Node !== null) state.row4Visits[item.row4Node] += 1;
+            updateRow4TrafficText();
+            updateMetricsAndVerdict();
+          }
+        }
+      }
+
+      // 2) Mover bolas en vuelo
+      const geom = getBoardGeometry();
+      const remaining = [];
+      let countsDirty = false;
+      for (const b of state.flyingBalls) {
+        b.segElapsed += dt;
+        while (b.segElapsed >= state.stepDurationMs && b.segIdx < b.waypoints.length - 2) {
+          b.segElapsed -= state.stepDurationMs;
+          b.segIdx += 1;
+          // Flash en el triángulo recién golpeado
+          if (b.segIdx >= 1 && b.segIdx <= state.numRows) {
+            const pegNode = b.path[b.segIdx - 1];
+            state.pegFlashes.set(`${b.segIdx},${pegNode.col}`, 1.0);
+          }
+        }
+        if (b.segIdx >= b.waypoints.length - 2 && b.segElapsed >= state.stepDurationMs) {
+          if (!b.visualOnly) {
+            state.counts[b.finalBin] += 1;
+            if (b.row4Node !== null) state.row4Visits[b.row4Node] += 1;
+            countsDirty = true;
+          }
+        } else {
+          const p0 = b.waypoints[b.segIdx];
+          const p1 = b.waypoints[b.segIdx + 1];
+          const t = Math.min(1, b.segElapsed / state.stepDurationMs);
+          const arc = Math.sin(t * Math.PI) * (p1.x - p0.x) * 0.16;
+          b.x = p0.x + (p1.x - p0.x) * t + arc * 0.15;
+          b.y = p0.y + (p1.y - p0.y) * (t * t * 0.45 + t * 0.55);
+          b.trail.push({ x: b.x, y: b.y });
+          if (b.trail.length > 6) b.trail.shift();
+          remaining.push(b);
+        }
+      }
+      state.flyingBalls = remaining;
+
+      // 3) Desvanecer flashes de triángulos
+      for (const [key, val] of state.pegFlashes.entries()) {
+        const nextVal = val - dt * 0.004;
+        if (nextVal <= 0) state.pegFlashes.delete(key);
+        else state.pegFlashes.set(key, nextVal);
+      }
+
+      // 4) Interpolar suavemente las barras del gráfico
+      const targetCounts = state.mcSummary ? state.mcSummary.meanCounts : state.counts;
+      let chartStillInterpolating = false;
+      for (let k = 0; k <= state.numRows; k++) {
+        const diff = targetCounts[k] - state.chartDisplayCounts[k];
+        if (Math.abs(diff) > 0.03) {
+          state.chartDisplayCounts[k] += diff * Math.min(1, dt * 0.015);
+          chartStillInterpolating = true;
+        } else {
+          state.chartDisplayCounts[k] = targetCounts[k];
+        }
+      }
+
+      // 5) Burbujas suaves dentro de copas llenas
+      const maxC = Math.max(12, ...targetCounts, state.targetBalls * 0.30);
+      const binH = geom.binAreaH - 36;
+      if (state.bubbles.length < 36) {
+        for (let k = 0; k <= state.numRows; k++) {
+          if (targetCounts[k] > 0.5 && Math.random() < 0.08) {
+            const fillH = Math.min(binH, (targetCounts[k] / maxC) * binH);
+            const yBottom = getBinXY(k, geom).yBottom - 8;
+            state.bubbles.push({
+              bin: k,
+              dx: (Math.random() * 2 - 1),
+              y: yBottom - Math.random() * 4,
+              yTop: yBottom - fillH + 3,
+              vy: 0.025 + Math.random() * 0.03,
+              size: 1.1 + Math.random() * 1.4
+            });
+          }
+        }
+      }
+      state.bubbles = state.bubbles.filter(bub => {
+        bub.y -= bub.vy * dt;
+        return bub.y > bub.yTop;
+      });
+
+      if (countsDirty) {
+        const landed = state.counts.reduce((a, b) => a + b, 0);
+        document.getElementById("liveProgress").textContent = `Cayendo: ${landed} / ${state.targetBalls} bolas`;
+        updateRow4TrafficText();
+        updateMetricsAndVerdict();
+      }
+
+      if (state.isRunning && state.pendingQueue.length === 0 && state.flyingBalls.length === 0) {
+        state.isRunning = false;
+        if (!state.mcSummary) {
+          document.getElementById("liveProgress").textContent = `Completado: ${state.targetBalls} bolas en copas`;
+          updateMetricsAndVerdict();
+        }
+      }
+
+      drawBoard();
+      drawChart();
+
+      const hasLiquid = targetCounts.some(v => v > 0.5);
+      const keepAlive = state.isRunning || state.flyingBalls.length > 0 || state.pendingQueue.length > 0 || state.pegFlashes.size > 0 || chartStillInterpolating || hasLiquid;
+      if (keepAlive) {
+        state.animFrameId = requestAnimationFrame(tickAnimation);
+      } else {
+        state.animFrameId = null;
+      }
+    }
+
+    function stopAnimations() {
+      if (state.animFrameId !== null) {
+        cancelAnimationFrame(state.animFrameId);
+        state.animFrameId = null;
+      }
+      state.flyingBalls = [];
+      state.pendingQueue = [];
+      state.pegFlashes.clear();
+      state.isRunning = false;
+    }
+
+    function resetBoard(keepDefectMode = true) {
+      stopAnimations();
+      state.counts = new Array(state.numRows + 1).fill(0);
+      state.chartDisplayCounts = new Array(state.numRows + 1).fill(0);
+      state.row4Visits = [0, 0, 0, 0];
+      state.bubbles = [];
+      state.highlightPath = null;
+      state.mcSummary = null;
+      state.targetBalls = state.numBalls;
+      if (!keepDefectMode) state.defectMode = "none";
+      resolveActiveDefectCol();
+      document.getElementById("liveProgress").textContent = `Listo para lanzar N = ${state.numBalls} bolas`;
+      updateRow4TrafficText();
+      updateMetricsAndVerdict();
+      drawBoard();
+      drawChart();
+    }
+
+    function buildBallPayload(sim, geom, visualOnly = false) {
+      const waypoints = [getPegXY(0, 0, geom)];
+      for (let r = 1; r <= state.numRows; r++) {
+        const node = sim.path[r - 1];
+        const p = getPegXY(r, node.col, geom);
+        waypoints.push({ x: p.x, y: p.y - geom.pegRadius * 0.8 });
+      }
+      const finalBin = getBinXY(sim.finalBin, geom);
+      waypoints.push({ x: finalBin.x, y: geom.boardBottomY + 10 });
+
+      return {
+        waypoints,
+        path: sim.path,
+        segIdx: 0,
+        segElapsed: 0,
+        x: waypoints[0].x,
+        y: waypoints[0].y,
+        trail: [],
+        finalBin: sim.finalBin,
+        row4Node: sim.row4Node,
+        visualOnly
+      };
+    }
+
+    function launchBalls(totalBalls, singleSlow = false) {
+      resetBoard(true);
+      state.targetBalls = totalBalls;
+      const speed = singleSlow ? "slow" : document.getElementById("speedSelect").value;
+      const geom = getBoardGeometry();
+
+      if (speed === "slow") {
+        state.stepDurationMs = 285;
+        state.spawnIntervalMs = 150;
+      } else if (speed === "normal") {
+        state.stepDurationMs = 86;
+        state.spawnIntervalMs = totalBalls > 180 ? Math.max(4, 2400 / totalBalls) : 28;
+      } else if (speed === "fast") {
+        state.stepDurationMs = 38;
+        state.spawnIntervalMs = totalBalls > 120 ? Math.max(2, 1300 / totalBalls) : 11;
+      } else {
+        // Turbo animada: siempre muestra la lluvia dorada de bolas cayendo
+        state.stepDurationMs = 22;
+        state.spawnIntervalMs = Math.max(0.8, 950 / Math.max(1, totalBalls));
+      }
+
+      for (let i = 0; i < totalBalls; i++) {
+        const sim = simulateBallPath(state.numRows, state.activeDefectCol);
+        if (singleSlow && i === 0) state.highlightPath = sim.path;
+        state.pendingQueue.push(buildBallPayload(sim, geom, false));
+      }
+
+      state.isRunning = true;
+      document.getElementById("liveProgress").textContent = `Lanzando ${totalBalls} bolas...`;
+      updateMetricsAndVerdict();
+      ensureAnimationLoop();
+    }
+
+    function runMonteCarlo1000() {
+      resetBoard(true);
+      const R = 1000;
+      const N = state.numBalls;
+      const X = state.numRows;
+      state.targetBalls = N;
+      const muBase = X / 2.0;
+      const sigmaBase = Math.sqrt(X) / 2.0;
+      const expected = discretizedNormalExpected(X, N, muBase, sigmaBase);
+
+      const sumCounts = new Array(X + 1).fill(0);
+      const sumSqCounts = new Array(X + 1).fill(0);
+      const row4Sum = [0, 0, 0, 0];
+      const pVals = [];
+      let sumMean = 0, sumStd = 0, sumSkew = 0, acceptCount = 0;
+      let effectiveBins = 0;
+
+      for (let r = 0; r < R; r++) {
+        let defCol = null;
+        if (X >= 4 && state.defectMode !== "none") {
+          defCol = state.defectMode === "random" ? Math.floor(Math.random() * 4) : Number(state.defectMode);
+        }
+        const counts = new Array(X + 1).fill(0);
+        for (let b = 0; b < N; b++) {
+          const sim = simulateBallPath(X, defCol);
+          counts[sim.finalBin] += 1;
+          if (sim.row4Node !== null) row4Sum[sim.row4Node] += 1;
+        }
+        for (let k = 0; k <= X; k++) {
+          sumCounts[k] += counts[k];
+          sumSqCounts[k] += counts[k] * counts[k];
+        }
+        const st = computeSampleStatsFromCounts(counts);
+        sumMean += st.mean;
+        sumStd += st.std;
+        sumSkew += st.skew;
+        const chi = chiSquareTest(counts, expected);
+        effectiveBins = chi.effectiveBins;
+        if (!isNaN(chi.pVal)) {
+          pVals.push(chi.pVal);
+          if (chi.pVal > 0.05) acceptCount += 1;
+        }
+      }
+
+      const meanCounts = sumCounts.map(v => v / R);
+      const stdCounts = sumCounts.map((v, k) => {
+        const m = v / R;
+        return Math.sqrt(Math.max(0, sumSqCounts[k] / R - m * m));
+      });
+      pVals.sort((a, b) => a - b);
+      const medianP = pVals.length > 0 ? pVals[Math.floor(pVals.length / 2)] : NaN;
+
+      state.counts = meanCounts.map(v => Math.round(v));
+      state.row4Visits = row4Sum.map(v => Math.round(v / R));
+      state.mcSummary = {
+        meanCounts,
+        stdCounts,
+        meanOfMeans: sumMean / R,
+        meanOfStds: sumStd / R,
+        meanOfSkews: sumSkew / R,
+        chi2AcceptRate: pVals.length > 0 ? (acceptCount / pVals.length) * 100 : 0,
+        chi2MedianP: medianP,
+        effectiveBins
+      };
+
+      // Oleada animada demostrativa sobre el tablero mientras las barras suben al promedio MC
+      const geom = getBoardGeometry();
+      state.stepDurationMs = 40;
+      state.spawnIntervalMs = 18;
+      const demoCount = Math.min(55, Math.max(20, Math.round(N * 0.45)));
+      for (let i = 0; i < demoCount; i++) {
+        const sim = simulateBallPath(X, state.activeDefectCol);
+        state.pendingQueue.push(buildBallPayload(sim, geom, true));
+      }
+      state.isRunning = true;
+
+      document.getElementById("liveProgress").textContent = `Monte Carlo: 1.000 réplicas de N = ${N} bolas`;
+      updateRow4TrafficText();
+      updateMetricsAndVerdict();
+      ensureAnimationLoop();
+    }
+
+    // =========================================================================
+    // 4. EVENTOS DE INTERFAZ Y SINCRONIZACIÓN
+    // =========================================================================
+    function setBallCount(rawVal) {
+      const clamped = Math.max(1, Math.min(5000, Math.round(Number(rawVal) || 100)));
+      state.numBalls = clamped;
+      state.targetBalls = clamped;
+      syncControlsUI();
+      if (!state.isRunning) {
+        updateMetricsAndVerdict();
+        drawChart();
+      }
+    }
+
+    function setRowCount(rawVal) {
+      const clamped = Math.max(3, Math.min(15, Math.round(Number(rawVal) || 10)));
+      state.numRows = clamped;
+      if (state.numRows < 4) state.defectMode = "none";
+      syncControlsUI();
+      resetBoard(true);
+    }
+
+    document.getElementById("ballsSlider").addEventListener("input", (e) => setBallCount(e.target.value));
+    document.getElementById("ballsInput").addEventListener("change", (e) => setBallCount(e.target.value));
+    document.getElementById("ballsInput").addEventListener("input", (e) => {
+      if (e.target.value !== "") {
+        const val = Math.max(1, Math.min(5000, Math.round(Number(e.target.value) || 1)));
+        state.numBalls = val;
+        state.targetBalls = val;
+        document.getElementById("ballsSlider").value = Math.min(1000, val);
+        document.getElementById("ballsBadge").textContent = `N = ${val}`;
+        document.getElementById("btnRunN").textContent = `▶ Lanzar ${val} bolas (Animado)`;
+      }
+    });
+
+    document.querySelectorAll(".ball-preset").forEach(btn => {
+      btn.addEventListener("click", () => setBallCount(btn.dataset.balls));
+    });
+
+    document.getElementById("rowsSlider").addEventListener("input", (e) => setRowCount(e.target.value));
+    document.getElementById("rowsInput").addEventListener("change", (e) => setRowCount(e.target.value));
+    document.querySelectorAll(".row-preset").forEach(btn => {
+      btn.addEventListener("click", () => setRowCount(btn.dataset.rows));
+    });
+
+    document.querySelectorAll(".defect-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        state.defectMode = btn.dataset.defect;
+        syncControlsUI();
+        resetBoard(true);
+      });
+    });
+
+    boardCanvas.addEventListener("click", (evt) => {
+      if (state.numRows < 4) return;
+      const rect = boardCanvas.getBoundingClientRect();
+      const mx = (evt.clientX - rect.left) * (boardCanvas.width / rect.width);
+      const my = (evt.clientY - rect.top) * (boardCanvas.height / rect.height);
+      for (const peg of state.pegCoords) {
+        const dx = mx - peg.x;
+        const dy = my - peg.y;
+        if (dx * dx + dy * dy <= (peg.r + 4) * (peg.r + 4)) {
+          const clicked = String(peg.col);
+          state.defectMode = (state.defectMode === clicked) ? "none" : clicked;
+          syncControlsUI();
+          resetBoard(true);
+          return;
+        }
+      }
+    });
+
+    document.getElementById("btnRunN").addEventListener("click", () => launchBalls(state.numBalls, false));
+    document.getElementById("btnRun1Slow").addEventListener("click", () => launchBalls(1, true));
+    document.getElementById("btnRunMC").addEventListener("click", () => runMonteCarlo1000());
+    document.getElementById("btnReset").addEventListener("click", () => resetBoard(true));
+
+    function activateTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabId));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === tabId));
+    }
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+    });
+
+    window.loadDemoScenario = function(rows, balls, defectMode, mode) {
+      activateTab("tab-sim");
+      state.numRows = rows;
+      state.numBalls = balls;
+      state.targetBalls = balls;
+      state.defectMode = defectMode;
+      syncControlsUI();
+      if (mode === "mc") runMonteCarlo1000();
+      else if (mode === "slow") launchBalls(1, true);
+      else launchBalls(balls, false);
+    };
+
+    window.openModal = function(src) {
+      document.getElementById("modalImg").src = src;
+      document.getElementById("imgModal").classList.add("open");
+    };
+
+    function populateTables() {
+      document.getElementById("tableStage1Body").innerHTML = STAGE1_TABLE.map(r => {
+        const cls = r.x === 10 ? "highlight-row" : "";
+        const bCls = r.verdict === "NORMAL ACEPTABLE" ? "badge-ok" : (r.verdict === "TRANSICIÓN" ? "badge-warn" : "badge-bad");
+        return `<tr class="${cls}">
+          <td><strong>${r.x}${r.x === 10 ? " (X_mín)" : ""}</strong></td>
+          <td>${r.bins}</td>
+          <td>${r.eff}</td>
+          <td>${r.df}</td>
+          <td>${r.chi2.toFixed(2)}</td>
+          <td>${r.pMed.toFixed(3)}</td>
+          <td>${r.accChi2.toFixed(1)}%</td>
+          <td>${r.accK2.toFixed(1)}%</td>
+          <td>${r.accSW.toFixed(1)}%</td>
+          <td>${r.kurt.toFixed(3)}</td>
+          <td><span class="badge ${bCls}">${r.verdict}</span></td>
+        </tr>`;
+      }).join("");
+
+      document.getElementById("tableStage2Body").innerHTML = STAGE2_TABLE.map((r, idx) => {
+        const style = (idx === 2 || idx === 3) ? "style='background:rgba(224,138,68,0.16);font-weight:700;'" : "";
+        return `<tr ${style}>
+          <td>${r.name}</td>
+          <td>${r.traffic}</td>
+          <td>${r.mu}</td>
+          <td><strong>${r.dmu}</strong></td>
+          <td>${r.std}</td>
+          <td>${r.skew}</td>
+          <td>${r.pMed}</td>
+          <td>${r.rej}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    populateTables();
+    syncControlsUI();
+    resetBoard(true);
+  </script>
+</body>
+</html>
