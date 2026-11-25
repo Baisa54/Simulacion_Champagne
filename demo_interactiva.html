@@ -652,46 +652,6 @@
       color: var(--text-soft);
     }
 
-    .step-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 5px solid var(--gold);
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-
-    .step-text {
-      flex: 1 1 560px;
-    }
-
-    .step-text h3 {
-      margin: 0 0 6px;
-      color: var(--champagne);
-    }
-
-    .step-text p {
-      margin: 4px 0;
-      font-size: 0.9rem;
-      color: var(--text-soft);
-    }
-
-    .quote-say {
-      background: rgba(229, 193, 88, 0.08);
-      border-radius: 8px;
-      padding: 9px 12px;
-      margin-top: 8px;
-      font-size: 0.88rem;
-      color: var(--champagne);
-      border: 1px dashed rgba(229, 193, 88, 0.45);
-    }
-
     .modal {
       display: none;
       position: fixed;
@@ -734,7 +694,6 @@
         <button class="tab-btn active" data-tab="tab-sim">1. Simulador en Vivo</button>
         <button class="tab-btn" data-tab="tab-e1">2. Resultados Etapa 1 (X_mín = 10)</button>
         <button class="tab-btn" data-tab="tab-e2">3. Resultados Etapa 2 (4.º Renglón)</button>
-        <button class="tab-btn" data-tab="tab-guion">4. Guion para Defender al Profesor</button>
       </nav>
     </div>
   </header>
@@ -1042,7 +1001,7 @@
             </table>
           </div>
           <div class="hint-box" style="margin-top:12px;">
-            <strong>Lectura clave para la defensa:</strong><br/>
+            <strong>Conclusiones clave:</strong><br/>
             1) <strong>Pos 1 y Pos 2 (centro):</strong> triplican el corrimiento de la media (Δμ = -0.075 vs. -0.025).<br/>
             2) <strong>Mitad izquierda (Pos 0, Pos 1):</strong> manda bolas más al borde izquierdo → <em>aumenta</em> el desvío (s ≈ 1.600).<br/>
             3) <strong>Mitad derecha (Pos 2, Pos 3):</strong> devuelve bolas hacia el centro → <em>reduce</em> el desvío (s ≈ 1.554).<br/>
@@ -1063,59 +1022,6 @@
       </div>
     </section>
 
-    <!-- PESTAÑA 4: GUION DE DEMO -->
-    <section id="tab-guion" class="tab-panel">
-      <div class="card" style="margin-bottom:16px;">
-        <h2>Guion Rápido de 3 Minutos para Presentar al Profesor</h2>
-        <p style="margin:0;color:var(--text-soft);font-size:0.9rem;">
-          Hacé clic en cualquier paso para cargar automáticamente el escenario con animación en el Simulador en Vivo y leer la explicación lista para decir.
-        </p>
-      </div>
-
-      <div class="step-card">
-        <div class="step-text">
-          <h3>Paso 1 — Mostrar cómo funciona el modelo físico (Figura del TP: X = 4)</h3>
-          <p>Mostrale el tablero del enunciado con 4 renglones y 5 copas, lanzando 1 bola en cámara lenta o N = 100 bolas.</p>
-          <div class="quote-say">
-            <strong>Qué decir:</strong> "Cada bola entra por arriba y en cada triángulo sano decide izquierda o derecha con 50% de probabilidad, como tirar una moneda X veces. Con X = 4 renglones (como en el dibujo del enunciado) solo hay 5 copas y la forma queda muy achatada (curtosis -0.50), por eso no alcanza todavía una normalidad estructural aceptable."
-          </div>
-        </div>
-        <button class="btn-action btn-gold" style="width:auto;" onclick="loadDemoScenario(4, 100, 'none', 'slow')">Cargar Paso 1 (X = 4)</button>
-      </div>
-
-      <div class="step-card" style="border-left-color:var(--green);">
-        <div class="step-text">
-          <h3>Paso 2 — Demostrar el mínimo necesario (X_mín = 10 renglones)</h3>
-          <p>Cambiá a 10 renglones (11 copas) y corré 1.000 réplicas Monte Carlo para que no dependa de la suerte de una sola corrida.</p>
-          <div class="quote-say">
-            <strong>Qué decir:</strong> "Probamos de X = 3 a X = 15 haciendo 1.000 réplicas de 100 bolas. Elegimos Chi-cuadrado contra la Normal Discretizada (con corrección por continuidad y regla de Cochran E_i ≥ 5) porque los datos son conteos discretos en copas; Shapiro-Wilk crudo falla ~100% por la cantidad de empates enteros. Sumando De Moivre-Laplace (X·p ≥ 5) y D'Agostino K², el mínimo consistente es X = 10 renglones."
-          </div>
-        </div>
-        <button class="btn-action btn-champagne-outline" style="width:auto;" onclick="loadDemoScenario(10, 100, 'none', 'mc')">Cargar Paso 2 (X = 10 MC)</button>
-      </div>
-
-      <div class="step-card" style="border-left-color:var(--rose-defect);">
-        <div class="step-text">
-          <h3>Paso 3 — Etapa 2: Defecto en un extremo del 4.º renglón (Pos 0)</h3>
-          <p>Activá el defecto 70% izquierda / 30% derecha en la Posición 0 (borde izquierdo del 4.º renglón) y simulá 1.000 corridas.</p>
-          <div class="quote-say">
-            <strong>Qué decir:</strong> "Si el triángulo fallado cae en un extremo del 4.º renglón (Posición 0 o 3), apenas el 12.5% de las bolas pasa por ahí (1 de cada 8 caminos). El corrimiento hacia la izquierda de la media es mínimo: Δμ = -0.025 (baja de 5.000 a 4.975), y en el borde izquierdo ensancha levemente la cola izquierda."
-          </div>
-        </div>
-        <button class="btn-action btn-mc" style="width:auto;" onclick="loadDemoScenario(10, 100, '0', 'mc')">Cargar Paso 3 (Defecto Pos 0)</button>
-      </div>
-
-      <div class="step-card" style="border-left-color:var(--red);">
-        <div class="step-text">
-          <h3>Paso 4 — Etapa 2: Defecto en el centro del 4.º renglón (Pos 1 o Pos 2)</h3>
-          <p>Mové el defecto al nodo central (Posición 1 ó 2) para comparar contra el extremo.</p>
-          <div class="quote-say">
-            <strong>Qué decir:</strong> "En cambio, si el defecto cae en el centro del 4.º renglón (Posición 1 o 2), pasa el 37.5% de las bolas (el triple de tráfico). Por eso el impacto sobre la media se triplica a Δμ = -0.075. Además, Pos 1 empuja bolas hacia el borde aumentando la varianza, mientras Pos 2 las devuelve al centro reduciendo la varianza. Como abajo quedan 6 renglones sanos y N=100 es una muestra chica, el desplazamiento equivale al 4.7% de σ y el test χ² rara vez rechaza en una sola corrida."
-          </div>
-        </div>
-        <button class="btn-action btn-mc" style="width:auto;background:#b91c1c;" onclick="loadDemoScenario(10, 100, '1', 'mc')">Cargar Paso 4 (Defecto Pos 1)</button>
-      </div>
-    </section>
   </main>
 
   <!-- Modal zoom imágenes -->
@@ -2333,18 +2239,6 @@
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => activateTab(btn.dataset.tab));
     });
-
-    window.loadDemoScenario = function(rows, balls, defectMode, mode) {
-      activateTab("tab-sim");
-      state.numRows = rows;
-      state.numBalls = balls;
-      state.targetBalls = balls;
-      state.defectMode = defectMode;
-      syncControlsUI();
-      if (mode === "mc") runMonteCarlo1000();
-      else if (mode === "slow") launchBalls(1, true);
-      else launchBalls(balls, false);
-    };
 
     window.openModal = function(src) {
       document.getElementById("modalImg").src = src;

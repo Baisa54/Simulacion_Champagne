@@ -15,3 +15,6 @@ env/
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# Guía personal de estudio (no subir a GitHub)
+GUIA_DEFENSA_PROFESOR.md

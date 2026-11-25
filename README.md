@@ -69,11 +69,10 @@ El tráfico hacia los $4$ triángulos del 4.º renglón sigue $\text{Binomial}(3
 |---|---|
 | [`main.py`](main.py) | Script principal que ejecuta ambas etapas, imprime tablas y exporta gráficos PNG (300 DPI) y CSV |
 | [`demo.py`](demo.py) | Lanzador de la aplicación visual interactiva |
-| [`demo_interactiva.html`](demo_interactiva.html) | Simulador físico animado en vivo con estética *dark-champagne*, gráficos en tiempo real y guion de demo |
+| [`demo_interactiva.html`](demo_interactiva.html) | Simulador físico animado en vivo con estética *dark-champagne* y gráficos en tiempo real |
 | [`src/simulator.py`](src/simulator.py) | Motor Monte Carlo vectorizado y programación dinámica exacta |
 | [`src/statistics.py`](src/statistics.py) | Normal discretizada, test $\chi^2$ con agrupamiento de Cochran, D'Agostino $K^2$ y Shapiro-Wilk |
 | [`src/visualization.py`](src/visualization.py) | Generación de los 5 gráficos comparativos de alta resolución |
 | [`tests/test_galton.py`](tests/test_galton.py) | Suite de 7 pruebas unitarias |
 | [`INFORME_TECNICO.md`](INFORME_TECNICO.md) | Informe técnico formal con el desarrollo estadístico y conclusiones |
-| [`GUIA_DEFENSA_PROFESOR.md`](GUIA_DEFENSA_PROFESOR.md) | Guía pedagógica explicada desde cero para la defensa oral |
 | [`output/`](output/) | Gráficos PNG (300 DPI) y tablas resumen CSV de Etapa 1 y Etapa 2 |

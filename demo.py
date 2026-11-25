@@ -1,4 +1,4 @@
-"""Lanzador de la vista gráfica interactiva para defender el TP 'Las copas de champagne' (MSTD)."""
+"""Lanzador de la vista gráfica interactiva del TP 'Las copas de champagne' (MSTD)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ import webbrowser
 ROOT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = ROOT_DIR / "output"
 HTML_PATH = ROOT_DIR / "demo_interactiva.html"
-GUIDE_PATH = ROOT_DIR / "GUIA_DEFENSA_PROFESOR.md"
 
 REQUIRED_ASSETS = [
     OUTPUT_DIR / "etapa1_comparacion_columnas.png",
@@ -34,8 +33,8 @@ def ensure_outputs_ready() -> None:
 
 
 def verify_demo_bundle() -> bool:
-    """Verifica que la demo HTML, la guía de defensa y todos los gráficos existan."""
-    required = [HTML_PATH, GUIDE_PATH, *REQUIRED_ASSETS]
+    """Verifica que la demo HTML y todos los gráficos existan."""
+    required = [HTML_PATH, *REQUIRED_ASSETS]
     missing = [p for p in required if not p.exists()]
     if missing:
         print("Archivos faltantes:")
@@ -43,7 +42,7 @@ def verify_demo_bundle() -> bool:
             print(f" - {item}")
         return False
 
-    print("Verificación OK: todos los archivos de la demo interactiva y defensa están listos:")
+    print("Verificación OK: todos los archivos de la demo interactiva están listos:")
     for item in required:
         print(f" - {item.name} ({item.stat().st_size:,} bytes)")
     return True
@@ -70,11 +69,10 @@ def main() -> int:
     url = HTML_PATH.resolve().as_uri()
     print("\nAbriendo demo interactiva en tu navegador predeterminado:")
     print(f" -> {url}")
-    print("\nGuía rápida para mostrar al profesor:")
+    print("\nVistas disponibles en la aplicación:")
     print(" 1) Pestaña 1 ('Simulador en Vivo'): probá X=4 (enunciado) vs X=10 (óptimo) y clic en los triángulos del 4.º renglón.")
-    print(" 2) Pestaña 2 y 3: tablas completas de Monte Carlo (R=1000) y gráficos en alta resolución.")
-    print(" 3) Pestaña 4: guion paso a paso con botones automáticos para cada caso de la defensa.")
-    print(f" 4) Para estudiar antes de rendir, abrí: {GUIDE_PATH.name}")
+    print(" 2) Pestaña 2 ('Resultados Etapa 1'): tabla Monte Carlo (R=1000) y gráficos comparativos.")
+    print(" 3) Pestaña 3 ('Resultados Etapa 2'): árbol de tráfico nodal, tabla comparativa y gráficos en alta resolución.")
     webbrowser.open(url)
     return 0
 
