@@ -14,21 +14,7 @@ def discretized_normal_expected(
     mu: float | None = None,
     sigma: float | None = None,
 ) -> np.ndarray:
-    """Calcula las frecuencias esperadas por receptáculo bajo una Normal discretizada.
-
-    Utiliza corrección por continuidad asignando a cada receptáculo `k` la probabilidad
-    normal acumulada en `[k - 0.5, k + 0.5]`, extendiendo las colas extremas hacia
-    `(-inf, 0.5]` y `[X - 0.5, +inf)` para conservar suma exacta igual a `num_balls`.
-
-    Args:
-        num_rows: Cantidad de renglones `X`.
-        num_balls: Cantidad total de bolas `N`.
-        mu: Media teórica (por defecto `X / 2`).
-        sigma: Desvío estándar teórico (por defecto `sqrt(X) / 2`).
-
-    Returns:
-        Vector de longitud `X + 1` con las frecuencias esperadas `E_k`.
-    """
+    """Calcula las frecuencias esperadas por copa integrando la Normal en [k - 0.5, k + 0.5]."""
     if mu is None:
         mu = num_rows / 2.0
     if sigma is None:
@@ -56,16 +42,7 @@ def pool_tails_cochran(
     expected: np.ndarray,
     min_expected: float = 5.0,
 ) -> tuple[np.ndarray, np.ndarray, int]:
-    """Agrupa colas izquierda y derecha para satisfacer la condición de Cochran (E_i >= 5).
-
-    Args:
-        observed: Frecuencias observadas por receptáculo.
-        expected: Frecuencias esperadas por receptáculo.
-        min_expected: Frecuencia esperada mínima requerida por clase agrupada.
-
-    Returns:
-        Tupla `(observed_pooled, expected_pooled, effective_bins)`.
-    """
+    """Agrupa las copas de los extremos para cumplir con la regla de Cochran (E_i >= 5)."""
     obs = observed.astype(np.float64).tolist()
     exp = expected.astype(np.float64).tolist()
 
@@ -109,18 +86,7 @@ def chi_square_discretized_normal_test(
     ddof: int = 0,
     min_expected: float = 5.0,
 ) -> dict[str, float | int | bool]:
-    """Ejecuta el test Chi-cuadrado de bondad de ajuste con agrupamiento de colas de Cochran.
-
-    Args:
-        counts: Frecuencias observadas en los receptáculos.
-        expected: Frecuencias esperadas bajo el modelo normal discretizado.
-        ddof: Grados de libertad perdidos por parámetros estimados desde la muestra
-            (0 para H0 con parámetros teóricos conocidos `mu=X/2, sigma=sqrt(X)/2`).
-        min_expected: Mínimo esperado por contenedor agrupado (5.0 según regla de Cochran).
-
-    Returns:
-        Diccionario con `statistic`, `p_value`, `df`, `effective_bins` y `valid`.
-    """
+    """Test Chi-cuadrado de bondad de ajuste con agrupamiento de extremos (Cochran)."""
     obs_p, exp_p, effective_bins = pool_tails_cochran(counts, expected, min_expected=min_expected)
     df = effective_bins - 1 - ddof
     if df <= 0:
@@ -205,17 +171,11 @@ def evaluate_row_count_normality(
     mc_result: dict[str, Any],
     alpha: float = 0.05,
 ) -> dict[str, Any]:
-    """Evalúa la normalidad Monte Carlo para un tablero estándar de X renglones (Etapa 1).
+    """Evalúa si X renglones alcanzan una distribución normal aceptable en la Etapa 1.
 
-    Criterio compuesto de normalidad aceptable con N = 100 bolas:
-      1. Criterio estructural de De Moivre-Laplace / Cochran: `X * p >= 5` y `X * (1 - p) >= 5`
-         (equivale a `X >= 10`, `sigma >= 1.581` y exceso de curtosis teórico `|gamma_2| <= 0.20`),
-         junto con al menos 6 contenedores efectivos (`E_i >= 5`).
-      2. Bondad de ajuste Chi-cuadrado contra Normal Discretizada: tasa de aceptación >= 90%.
-      3. Test omnibus de forma (D'Agostino-Pearson K²): tasa de no-rechazo >= 90%.
-
-    Nota: Shapiro-Wilk crudo sobre enteros discretos se reporta como referencia comparativa para
-    evidenciar la penalización por empates en datos agrupados en contenedores.
+    Pide cumplir X * p >= 5 (De Moivre-Laplace), al menos 6 grupos efectivos (E_i >= 5),
+    y >= 90% de aceptación tanto en Chi-cuadrado como en D'Agostino-Pearson K².
+    También calcula Shapiro-Wilk como referencia para mostrar el efecto de los empates.
     """
     config = mc_result["config"]
     num_rows = config.num_rows

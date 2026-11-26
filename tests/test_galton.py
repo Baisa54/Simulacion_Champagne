@@ -119,7 +119,7 @@ def test_discretized_normal_and_cochran_pooling() -> None:
 
 
 def test_stage1_normality_monotone_convergence() -> None:
-    """Para X=3 no cumple normalidad aceptable; para X=10 sí cumple y SW crudo evidencia empates."""
+    """Con X=3 no cumple normalidad aceptable; con X=10 sí cumple y Shapiro-Wilk rechaza por empates."""
     mc_low = run_monte_carlo(GaltonConfig(num_rows=3, num_balls=100), num_replications=300, seed=10)
     res_low = evaluate_row_count_normality(mc_low)
     assert res_low["is_acceptable"] is False

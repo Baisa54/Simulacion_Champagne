@@ -1,78 +1,44 @@
-# Las Copas de Champagne — Tablero de Galton (MSTD)
+# TP: Las Copas de Champagne (Tablero de Galton) - MSTD
 
-Proyecto de simulación estocástica, inferencia estadística y visualización interactiva para el trabajo práctico **"Las copas de champagne"** de la materia **Modelado, Simulación y Teoría de la Decisión (MSTD)**.
+Trabajo práctico para la materia **Modelado, Simulación y Teoría de la Decisión (UNLu)** sobre la simulación del Tablero de Galton con $N = 100$ bolas por tirada y $1.000$ corridas de Monte Carlo por escenario.
 
----
+## Qué se hizo
 
-## Descripción del Problema
+1. **Etapa 1 (Cantidad mínima de renglones):**  
+   Se simularon tableros de 3 a 15 renglones tirando 100 bolas por corrida (1.000 corridas de Monte Carlo por cada tamaño) para ver a partir de cuántos renglones la distribución en las copas se puede considerar Normal. Usando el test Chi-cuadrado con agrupamiento de extremos (regla de Cochran, mínimo 5 bolas esperadas), la condición `X * p >= 5` y el test de D'Agostino-Pearson, llegamos a que el mínimo es **`X = 10` renglones (11 copas)**. También se dejó registrado por qué Shapiro-Wilk no sirve acá (al caer las 100 bolas en pocas copas enteras hay demasiados valores repetidos y rechaza siempre).
 
-Se modela un Tablero de Galton entre dos vidrios con $X$ renglones de triángulos clavados y $X + 1$ receptáculos ("copas") en la base, lanzando $N = 100$ bolas por corrida desde el centro superior:
+2. **Etapa 2 (Triángulo defectuoso en el 4.º renglón):**  
+   Sobre el tablero de 10 renglones se puso un triángulo fallado en el 4.º renglón que desvía 70% a la izquierda y 30% a la derecha. Se comparó qué pasa en las 4 posiciones posibles y al azar: por los triángulos del centro pasa el triple de bolas (37,5%) que por los de las puntas (12,5%), corriendo el triple la media (`-0,075` vs `-0,025`), aunque en una sola tirada de 100 bolas el desvío es tan chico que casi no se detecta.
 
-1. **Etapa 1 — Mínimo de renglones ($X_{\min}$) para normalidad aceptable:** Determinar el menor número de renglones $X$ tal que la distribución en los receptáculos alcance una normalidad aceptable de manera consistente ($R = 1\,000$ réplicas Monte Carlo de $N = 100$ bolas).
-2. **Etapa 2 — Impacto de un triángulo defectuoso en el 4.º renglón:** Analizar cómo cambia la distribución obtenida en $X_{\min}$ cuando un único triángulo del 4.º renglón (posiciones `0`, `1`, `2`, `3` o aleatoria) desvía $70\%$ de las bolas hacia la izquierda y $30\%$ hacia la derecha.
+## Cómo probar la simulación
 
----
-
-## Resultados Principales
-
-### Etapa 1: $X_{\min} = 10$ renglones ($11$ receptáculos)
-- **Herramienta estadística:** Test $\chi^2$ de bondad de ajuste contra la **Normal Discretizada** $\mathcal{N}(X/2, X/4)$ con corrección por continuidad $[k - 0.5, k + 0.5]$ y agrupamiento de colas según la **regla de Cochran ($E_i \ge 5$)**, complementado con el test omnibus de forma **D'Agostino-Pearson $K^2$**, mínimo $6$ clases activas y la condición estructural de **De Moivre-Laplace ($X \cdot p \ge 5 \implies X \ge 10$, $|\gamma_2| \le 0.20$)**.
-- **Por qué no usar Shapiro-Wilk crudo:** al agrupar $100$ bolas en pocos enteros discretos ($0 \dots X$) existen más del $85\%$ de empates exactos (*ties*), provocando que Shapiro-Wilk crudo rechace casi el $100\%$ ($0.0\%$ hasta $X = 11$).
-- **Resultados en $X_{\min} = 10$:** $7$ clases efectivas ($gl = 6$), aceptación $\chi^2 = 95.0\%$ ($p_{\text{med}} = 0.515$), aceptación $K^2 = 96.4\%$ y exceso de curtosis teórico $\gamma_2 = -0.200$.
-
-![Comparación de columnas Etapa 1](output/etapa1_comparacion_columnas.png)
-
-### Etapa 2: Efecto de la ubicación del defecto en el 4.º renglón ($X = 10$)
-El tráfico hacia los $4$ triángulos del 4.º renglón sigue $\text{Binomial}(3, 0.5)$: los extremos (`Pos 0` y `Pos 3`) reciben **$12.5\%$** de las bolas, mientras que los nodos centrales (`Pos 1` y `Pos 2`) reciben **$37.5\%$** (**el triple**).
-
-| Escenario | Tráfico nodo | $\mu$ exacta | $\Delta \mu$ | Desvío MC | Asimetría exacta |
-|---|---:|---:|---:|---:|---:|
-| Sin defecto (50/50) | 100.0% | 5.000 | 0.000 | 1.576 | 0.0000 |
-| Posición 0 (Ext. Izq.) | 12.5% | 4.975 | -0.025 | 1.600 | -0.0229 |
-| Posición 1 (Centro-Izq.) | 37.5% | 4.925 | -0.075 | 1.599 | +0.0403 |
-| Posición 2 (Centro-Der.) | 37.5% | 4.925 | -0.075 | 1.553 | +0.0352 |
-| Posición 3 (Ext. Der.) | 12.5% | 4.975 | -0.025 | 1.554 | -0.0280 |
-| Posición Aleatoria | 25.0% | 4.950 | -0.050 | 1.577 | +0.0063 |
-
-![Comparación de columnas Etapa 2](output/etapa2_comparacion_columnas_defecto.png)
-
----
-
-## Instalación y Uso
-
-1. **Instalar dependencias:**
-   ```bash
+1. Instalar las librerías necesarias:
+   ```powershell
    pip install -r requirements.txt
    ```
 
-2. **Ejecutar simulación completa y generar gráficos/tablas en `/output`:**
-   ```bash
+2. Correr la simulación por consola (imprime las tablas de las dos etapas y guarda los gráficos y CSV en `output/`):
+   ```powershell
    python main.py
    ```
 
-3. **Abrir la vista gráfica y demo animada en vivo:**
-   ```bash
+3. Abrir el simulador visual en el navegador:
+   ```powershell
    python demo.py
    ```
-   *(También podés abrir directamente `demo_interactiva.html` en cualquier navegador, 100% offline).*
+   *(También se puede abrir directamente `demo_interactiva.html` haciendo doble clic en el archivo).*
 
-4. **Ejecutar pruebas unitarias:**
-   ```bash
+4. Correr las pruebas unitarias:
+   ```powershell
    python -m pytest -v
    ```
 
----
+## Archivos del proyecto
 
-## Estructura del Repositorio
-
-| Ruta | Descripción |
-|---|---|
-| [`main.py`](main.py) | Script principal que ejecuta ambas etapas, imprime tablas y exporta gráficos PNG (300 DPI) y CSV |
-| [`demo.py`](demo.py) | Lanzador de la aplicación visual interactiva |
-| [`demo_interactiva.html`](demo_interactiva.html) | Simulador físico animado en vivo con estética *dark-champagne* y gráficos en tiempo real |
-| [`src/simulator.py`](src/simulator.py) | Motor Monte Carlo vectorizado y programación dinámica exacta |
-| [`src/statistics.py`](src/statistics.py) | Normal discretizada, test $\chi^2$ con agrupamiento de Cochran, D'Agostino $K^2$ y Shapiro-Wilk |
-| [`src/visualization.py`](src/visualization.py) | Generación de los 5 gráficos comparativos de alta resolución |
-| [`tests/test_galton.py`](tests/test_galton.py) | Suite de 7 pruebas unitarias |
-| [`INFORME_TECNICO.md`](INFORME_TECNICO.md) | Informe técnico formal con el desarrollo estadístico y conclusiones |
-| [`output/`](output/) | Gráficos PNG (300 DPI) y tablas resumen CSV de Etapa 1 y Etapa 2 |
+- `main.py`: ejecuta las Etapas 1 y 2, muestra las tablas en consola y guarda gráficos y CSV en `output/`.
+- `demo.py` y `demo_interactiva.html`: simulador visual interactivo en el navegador.
+- `src/simulator.py`: simulación de las corridas Monte Carlo y cálculo exacto de probabilidades.
+- `src/statistics.py`: test Chi-cuadrado con regla de Cochran, D'Agostino-Pearson y Shapiro-Wilk.
+- `src/visualization.py`: generación de los gráficos de ambas etapas.
+- `tests/test_galton.py`: pruebas unitarias con `pytest`.
+- `INFORME_TECNICO.md` y `Informe_TP_Copas_de_Champagne.docx`: informe completo del TP con tablas, gráficos y conclusiones.

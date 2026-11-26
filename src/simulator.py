@@ -1,4 +1,4 @@
-"""Motor de simulación estocástica y cálculo exacto del Tablero de Galton ("Las copas de champagne")."""
+"""Simulación Monte Carlo y cálculo exacto para el Tablero de Galton."""
 
 from __future__ import annotations
 
@@ -10,16 +10,7 @@ import numpy as np
 
 @dataclass(frozen=True)
 class GaltonConfig:
-    """Configuración física y experimental de una corrida en el Tablero de Galton.
-
-    Attributes:
-        num_rows: Cantidad de renglones (filas de triángulos), X >= 1.
-        num_balls: Cantidad de bolas lanzadas por corrida (por defecto N = 100).
-        defect_row: Índice del renglón (base 1, 1..X) que contiene un triángulo defectuoso, o None.
-        defect_col: Índice del triángulo dentro de `defect_row` (base 0, 0..defect_row-1),
-            `"random"` para sortear uniformemente uno en cada corrida, o None si no hay defecto.
-        defect_p_left: Probabilidad de desvío a la izquierda en el triángulo defectuoso (por defecto 0.70).
-    """
+    """Parámetros de una corrida en el Tablero de Galton."""
 
     num_rows: int
     num_balls: int = 100
@@ -65,19 +56,7 @@ class GaltonConfig:
 def simulate_single_run(
     config: GaltonConfig, rng: np.random.Generator | None = None
 ) -> dict[str, Any]:
-    """Simula una corrida completa de N bolas cayendo por X renglones del Tablero de Galton.
-
-    Args:
-        config: Parámetros del tablero y del experimento.
-        rng: Generador de números pseudoaleatorios de NumPy.
-
-    Returns:
-        Diccionario con:
-            - `positions`: vector `(N,)` con el receptáculo final `k in {0, ..., X}` de cada bola.
-            - `counts`: vector `(X + 1,)` con la cantidad de bolas por receptáculo.
-            - `row4_visits`: vector `(4,)` con el paso por cada triángulo del 4.º renglón (o None si X < 4).
-            - `chosen_defect_col`: índice del triángulo defectuoso usado en la corrida (o None).
-    """
+    """Simula una tirada de N bolas cayendo por X renglones."""
     if rng is None:
         rng = np.random.default_rng()
 
@@ -119,19 +98,7 @@ def compute_exact_distribution(
     defect_col: int | None = None,
     defect_p_left: float = 0.70,
 ) -> tuple[np.ndarray, np.ndarray | None]:
-    """Calcula por programación dinámica las probabilidades exactas en los X + 1 receptáculos.
-
-    Args:
-        num_rows: Cantidad de renglones X >= 1.
-        defect_row: Renglón con defecto (base 1), o None.
-        defect_col: Índice de triángulo defectuoso (base 0), o None.
-        defect_p_left: Probabilidad de desvío a la izquierda del triángulo defectuoso.
-
-    Returns:
-        Tupla `(final_probs, row4_probs)` donde `final_probs` tiene longitud `X + 1` y
-        `row4_probs` tiene longitud 4 con la probabilidad de paso por cada triángulo del 4.º renglón
-        (o None si `num_rows < 4`).
-    """
+    """Calcula las probabilidades exactas en los X + 1 receptáculos."""
     if defect_row is not None and defect_col is None:
         raise ValueError("defect_col no puede ser None cuando defect_row está definido.")
     if defect_col is not None and defect_row is None:
@@ -193,16 +160,7 @@ def run_monte_carlo(
     num_replications: int = 1000,
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Ejecuta múltiples réplicas Monte Carlo independientes de la configuración dada.
-
-    Args:
-        config: Configuración del tablero de Galton.
-        num_replications: Número de corridas independientes de `config.num_balls` bolas.
-        seed: Semilla para reproducibilidad.
-
-    Returns:
-        Diccionario con matrices de conteos, posiciones, visitas al 4.º renglón y resúmenes.
-    """
+    """Corre varias repeticiones Monte Carlo de la configuración dada."""
     if num_replications < 1:
         raise ValueError(f"num_replications debe ser >= 1, recibido: {num_replications}")
 

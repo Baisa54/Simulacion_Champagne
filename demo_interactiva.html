@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Las Copas de Champagne — Simulador Ejecutivo MSTD</title>
+  <title>TP Las Copas de Champagne - MSTD</title>
   <style>
     :root {
       --bg: #14161d;
@@ -686,9 +686,9 @@
   <header>
     <div class="header-inner">
       <div class="title-block">
-        <div class="hero-badge">✦ Modelado, Simulación y Teoría de la Decisión (MSTD)</div>
-        <h1>LAS COPAS DE CHAMPAGNE — TABLERO DE GALTON</h1>
-        <p>Simulación estocástica en vivo · Determinación del mínimo de renglones (Etapa 1) e impacto de triángulo defectuoso 70/30 en el 4.º renglón (Etapa 2)</p>
+        <div class="hero-badge">Modelado, Simulación y Teoría de la Decisión (MSTD)</div>
+        <h1>LAS COPAS DE CHAMPAGNE - TABLERO DE GALTON</h1>
+        <p>Simulación en vivo · Mínimo de renglones (Etapa 1) e impacto de triángulo defectuoso 70/30 en el 4.º renglón (Etapa 2)</p>
       </div>
       <nav class="nav-tabs">
         <button class="tab-btn active" data-tab="tab-sim">1. Simulador en Vivo</button>
@@ -883,7 +883,7 @@
       </div>
 
       <div class="card" style="margin-bottom:18px;">
-        <h2>Tabla Completa Monte Carlo — Etapa 1 (N = 100 bolas, R = 1.000 réplicas por X)</h2>
+        <h2>Tabla Completa Monte Carlo - Etapa 1 (N = 100 bolas, R = 1.000 réplicas por X)</h2>
         <div style="overflow-x:auto;">
           <table>
             <thead>
@@ -909,7 +909,7 @@
       <div class="gallery-grid">
         <div class="img-card">
           <img src="output/etapa1_comparacion_columnas.png" alt="Comparación de columnas Etapa 1" onclick="openModal(this.src)" />
-          <p><strong>Gráficos de columnas (X = 3, 4, 6, 8 vs. X = 10 mínimo y X = 14):</strong> Se observa cómo para X ≤ 6 la campana es demasiado achatada (platicúrtica); en X = 10 ya adopta la campana gaussiana estable.</p>
+          <p><strong>Gráficos de columnas (X = 3, 4, 6, 8 vs. X = 10 mínimo y X = 14):</strong> Se observa cómo para X ≤ 6 la campana es demasiado achatada; en X = 10 ya adopta la campana normal estable.</p>
         </div>
         <div class="img-card">
           <img src="output/etapa1_evolucion_normalidad.png" alt="Evolución de normalidad Etapa 1" onclick="openModal(this.src)" />
@@ -982,7 +982,7 @@
         </div>
 
         <div class="card">
-          <h2>Tabla Comparativa — Etapa 2 (X = 10, N = 100, R = 1.000 réplicas)</h2>
+          <h2>Tabla Comparativa - Etapa 2 (X = 10, N = 100, R = 1.000 réplicas)</h2>
           <div style="overflow-x:auto;">
             <table>
               <thead>
@@ -1698,7 +1698,7 @@
 
         if (state.defectMode !== "none" && X >= 4) {
           banner.className = "verdict-banner neutral";
-          vTitle.textContent = `Etapa 2 (1.000 réplicas de N=${state.targetBalls}) — ${getDefectLabel()}`;
+          vTitle.textContent = `Etapa 2 (1.000 réplicas de N=${state.targetBalls}) - ${getDefectLabel()}`;
           vDesc.textContent = `Corrimiento exacto Δμ = ${deltaMu.toFixed(3)}. Aceptación χ² vs Normal base: ${mc.chi2AcceptRate.toFixed(1)}% (rechazo ${(100 - mc.chi2AcceptRate).toFixed(1)}%).`;
         } else if (X >= 10) {
           banner.className = "verdict-banner ok";
@@ -1711,7 +1711,7 @@
         } else {
           banner.className = "verdict-banner bad";
           vTitle.textContent = `NO ACEPTABLE (X = ${X} insuficiente)`;
-          vDesc.textContent = `Solo ${X + 1} copas y curtosis muy platicúrtica (${kurtTheo.toFixed(3)}). No cumple X·p ≥ 5.`;
+          vDesc.textContent = `Solo ${X + 1} copas y forma muy achatada (curtosis ${kurtTheo.toFixed(3)}). No cumple X·p ≥ 5.`;
         }
         updateLiveBinsTable();
         return;
@@ -1762,7 +1762,7 @@
       } else if (state.defectMode !== "none" && X >= 4) {
         const pass = !isNaN(chi2.pVal) && chi2.pVal > 0.05;
         banner.className = pass ? "verdict-banner neutral" : "verdict-banner bad";
-        vTitle.textContent = `Etapa 2 (N = ${st.n}) — ${pass ? "No rechaza Normal base" : "Rechaza Normal base"} (p = ${chi2.pVal.toFixed(3)})`;
+        vTitle.textContent = `Etapa 2 (N = ${st.n}) - ${pass ? "No rechaza Normal base" : "Rechaza Normal base"} (p = ${chi2.pVal.toFixed(3)})`;
         vDesc.textContent = "En una corrida individual el ruido muestral suele tapar el sesgo del 4.º renglón. Probá N más grande o 1.000 réplicas Monte Carlo.";
       } else if (X >= 10 && !isNaN(chi2.pVal) && chi2.pVal > 0.05) {
         banner.className = "verdict-banner ok";
