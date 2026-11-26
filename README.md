@@ -10,33 +10,44 @@ Trabajo práctico para la materia **Modelado, Simulación y Teoría de la Decisi
 2. **Etapa 2 (Triángulo defectuoso en el 4.º renglón):**  
    Sobre el tablero de 10 renglones se puso un triángulo fallado en el 4.º renglón que desvía 70% a la izquierda y 30% a la derecha. Se comparó qué pasa en las 4 posiciones posibles y al azar: por los triángulos del centro pasa el triple de bolas (37,5%) que por los de las puntas (12,5%), corriendo el triple la media (`-0,075` vs `-0,025`), aunque en una sola tirada de 100 bolas el desvío es tan chico que casi no se detecta.
 
-## Cómo probar la simulación
+## Cómo probar la simulación (paso a paso)
 
-1. Instalar las librerías necesarias:
+Podés probar el simulador de dos formas. Si solo querés verlo funcionando en la pantalla sin instalar nada, usá la **Opción 1**.
+
+### Opción 1: La forma más fácil (sin instalar nada, solo el simulador visual)
+
+1. En esta misma página de GitHub, buscá el botón verde que dice **`<> Code`** (está arriba a la derecha de la lista de archivos), hacé clic ahí y elegí **`Download ZIP`**.
+2. Andá a la carpeta **Descargas** de tu computadora. Vas a ver un archivo comprimido (con ícono de cierre). Hacé **clic derecho** sobre ese archivo y tocá **"Extraer todo..."** (o "Descomprimir aquí") para pasarlo a una carpeta normal.
+3. Entrá a la carpeta que se acaba de crear, buscá el archivo **`demo_interactiva.html`** y hacele **doble clic**.
+4. Se va a abrir solo en tu navegador (Chrome, Edge, Firefox o el que uses). Adentro ya podés tirar bolas, cambiar la cantidad de renglones, activar el triángulo defectuoso en el 4.º renglón y mirar los gráficos y tablas de las dos etapas, sin tocar ninguna consola ni instalar ningún programa.
+
+### Opción 2: Si querés correr el código en Python (para volver a generar los gráficos y tablas)
+
+1. **Instalar Python:** si no lo tenés en tu computadora, descargalo desde https://www.python.org/downloads/ y abrilo para instalarlo. Muy importante: en la primera pantalla del instalador, tildá la casilla que dice **"Add Python to PATH"** antes de tocar *Install Now*.
+2. **Bajar el proyecto:** descargá y descomprimí la carpeta siguiendo los pasos 1 y 2 de la Opción 1 (o usá `git clone` si ya sabés usar Git).
+3. **Abrir la ventana de comandos en la carpeta:** abrí la carpeta del proyecto en el Explorador de Windows, hacé clic arriba de todo en la barra donde figura la dirección de la carpeta, escribí **`cmd`** y apretá **Enter**. Se va a abrir una ventana negra ya parada dentro del proyecto.
+4. **Instalar las librerías (se hace una sola vez):** en esa ventana negra escribí el siguiente comando y apretá **Enter** (esperá a que termine de descargar):
    ```powershell
    pip install -r requirements.txt
    ```
-
-2. Correr la simulación por consola (imprime las tablas de las dos etapas y guarda los gráficos y CSV en `output/`):
-   ```powershell
-   python main.py
-   ```
-
-3. Abrir el simulador visual en el navegador:
-   ```powershell
-   python demo.py
-   ```
-   *(También se puede abrir directamente `demo_interactiva.html` haciendo doble clic en el archivo).*
-
-4. Correr las pruebas unitarias:
-   ```powershell
-   python -m pytest -v
-   ```
+5. **Ejecutar lo que quieras probar:**
+   - Para correr todas las simulaciones, ver las tablas en consola y volver a generar los gráficos y CSV dentro de `output/`:
+     ```powershell
+     python main.py
+     ```
+   - Para abrir el simulador visual en el navegador desde Python:
+     ```powershell
+     python demo.py
+     ```
+   - Para correr las pruebas automáticas y verificar que todo el código funciona bien:
+     ```powershell
+     python -m pytest -v
+     ```
 
 ## Archivos del proyecto
 
+- `demo_interactiva.html` y `demo.py`: simulador visual interactivo en el navegador.
 - `main.py`: ejecuta las Etapas 1 y 2, muestra las tablas en consola y guarda gráficos y CSV en `output/`.
-- `demo.py` y `demo_interactiva.html`: simulador visual interactivo en el navegador.
 - `src/simulator.py`: simulación de las corridas Monte Carlo y cálculo exacto de probabilidades.
 - `src/statistics.py`: test Chi-cuadrado con regla de Cochran, D'Agostino-Pearson y Shapiro-Wilk.
 - `src/visualization.py`: generación de los gráficos de ambas etapas.
